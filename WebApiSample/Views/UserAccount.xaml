@@ -1,0 +1,91 @@
+﻿<Page
+    x:Class="WebApiSample.Views.UserAccount"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WebApiSample.Views"
+    xmlns:ctl="using:WebApiSample.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+          EntranceNavigationTransitionInfo.IsTargetElement="True">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <CommandBar x:Name="topBar" VerticalAlignment="Top" HorizontalAlignment="Stretch">
+            <AppBarButton Icon="Add" Label="Add" Click="AppBarButton_Click"/>
+            <AppBarButton Icon="Accept" Label="Accept" Click="AppBarButton_Click"/>
+            <AppBarSeparator/>
+            <AppBarButton Icon="Sort" Label="Sort" Click="AppBarButton_Click"/>
+            <CommandBar.SecondaryCommands>
+                <AppBarButton Label="menu1" Click="AppBarButton_Click"/>
+                <AppBarButton Label="menu2" Click="AppBarButton_Click"/>
+                <AppBarButton Label="menu3" Click="AppBarButton_Click"/>
+            </CommandBar.SecondaryCommands>
+            <CommandBar.Content>
+                <ctl:PageHeader>
+                    <ctl:PageHeader.HeaderContent>
+                        <TextBlock Text="用户账户" 
+                                   Style="{ThemeResource PageTitleTextBlockStyle}" 
+                                   TextWrapping="NoWrap"/>
+                    </ctl:PageHeader.HeaderContent>
+                </ctl:PageHeader>
+            </CommandBar.Content>
+        </CommandBar>
+        <TextBlock Grid.Row="1"
+                   Text="用户中心"
+                   FontSize="24"
+                   Margin="0 10"
+                   HorizontalAlignment="Center"/>
+        <Grid Grid.Row="2" HorizontalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="tbAccount"
+                       Text="用户名:"
+                       Margin="10"/>
+            <TextBox x:Name="txtAccount" 
+                     PlaceholderText="输入用户名"
+                     Margin="0 10 0 10"
+                     Grid.Column="1"/>
+            <TextBlock x:Name="tbPassword"
+                       Text="密码:"
+                       Margin="10"
+                       Grid.Row="1"
+                       Grid.Column="0"/>
+            <PasswordBox x:Name="txtPassword" 
+                     IsPasswordRevealButtonEnabled="True"
+                     Margin="0 10 0 10"
+                     Grid.Row="1"
+                     Grid.Column="1"/>
+        </Grid>
+        <RelativePanel Grid.Row="4" HorizontalAlignment="Center">
+            <Button x:Name="btnLogin"
+                    Content="Login"
+                    Margin="10"
+                    Background="Blue"
+                    Click="btnLogin_Click"/>
+            <Button x:Name="btnRegister"
+                    Content="register"
+                    Margin="10"
+                    RelativePanel.AlignVerticalCenterWith="btnLogin"
+                    RelativePanel.RightOf="btnLogin"
+                    Click="btnRegister_Click"/>
+        </RelativePanel>
+        <ProgressRing x:Name="loading"
+                      IsActive="False"
+                      Grid.RowSpan="6"
+                      Width="150"
+                      Height="150"/>
+    </Grid>
+</Page>
