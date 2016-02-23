@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WebApiSample.Common;
+using WebApiSample.FaceRecognizatioin;
 using WebApiSample.Model;
 using Windows.Web.Http;
 
@@ -54,17 +55,28 @@ namespace WebApiSample.Helpers
                 string json = JsonHelper.ObjectToJson(user);
                 HttpService http = new HttpService();
                 HttpResponseMessage response = await http.SendPostRequest(uriRegister, json);
-                if (response.StatusCode == HttpStatusCode.Created)
+                if(response!=null)
                 {
-                    return RegisterStaus.Success;
-                }
-                else if (response.StatusCode == HttpStatusCode.Conflict)
-                {
-                    return RegisterStaus.ConflictUserName;
-                }
-                else if (response.StatusCode == HttpStatusCode.BadRequest)
-                {
-                    return RegisterStaus.Failed;
+                    if (response.StatusCode == HttpStatusCode.Created)
+                    {
+                        FaceApiHelper faceApi = new FaceApiHelper();
+                        string facelistId = EncriptHelper.ToMd5(userName);
+                        facelistId = facelistId.ToLower();
+                        FaceApiHelper.FaceListStatus status = await faceApi.FaceListCreate(facelistId);
+                        if (status == FaceApiHelper.FaceListStatus.success)
+                        {
+                            return RegisterStaus.Success;
+                        }
+                        return RegisterStaus.FaceListFailed;
+                    }
+                    else if (response.StatusCode == HttpStatusCode.Conflict)
+                    {
+                        return RegisterStaus.ConflictUserName;
+                    }
+                    else if (response.StatusCode == HttpStatusCode.BadRequest)
+                    {
+                        return RegisterStaus.Failed;
+                    }
                 }
             }
             catch { }
@@ -73,7 +85,7 @@ namespace WebApiSample.Helpers
 
         public enum RegisterStaus
         {
-            Success,ConflictUserName,Failed
+            Success,ConflictUserName,Failed,FaceListFailed
         }
     }
 }

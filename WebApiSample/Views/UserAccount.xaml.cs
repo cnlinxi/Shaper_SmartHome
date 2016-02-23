@@ -55,50 +55,64 @@ namespace WebApiSample.Views
 
         private async void btnLogin_Click(object sender, RoutedEventArgs e)
         {
-            this.btnLogin.IsEnabled = false;
-            this.btnRegister.IsEnabled = false;
-            this.loading.IsActive = true;
-            UserAccountService userAccount = new UserAccountService();
-            bool isSuceess = await userAccount.Login(txtAccount.Text, txtPassword.Password);
-            if(isSuceess)
+            if(txtAccount.Text.Length>0&&txtPassword.Password.Length>0)
             {
-                await new MessageBox("登录成功！",MessageBox.NotifyType.CommonMessage).ShowAsync();
-                var vault = new PasswordVault();
-                vault.Add(new PasswordCredential(resourceName, txtAccount.Text, txtPassword.Password));
+                this.btnLogin.IsEnabled = false;
+                this.btnRegister.IsEnabled = false;
+                this.loading.IsActive = true;
+                UserAccountService userAccount = new UserAccountService();
+                bool isSuceess = await userAccount.Login(txtAccount.Text, txtPassword.Password);
+                if (isSuceess)
+                {
+                    await new MessageBox("登录成功！", MessageBox.NotifyType.CommonMessage).ShowAsync();
+                    var vault = new PasswordVault();
+                    vault.Add(new PasswordCredential(resourceName, txtAccount.Text, txtPassword.Password));
+                }
+                else
+                {
+                    await new MessageBox("登录失败，请重试", MessageBox.NotifyType.CommonMessage).ShowAsync();
+                }
+                this.btnLogin.IsEnabled = true;
+                this.btnRegister.IsEnabled = true;
+                this.loading.IsActive = false;
             }
             else
             {
-                await new MessageBox("登录失败，请重试", MessageBox.NotifyType.CommonMessage).ShowAsync();
+                await new MessageBox("用户名或者密码不可为空！", MessageBox.NotifyType.CommonMessage).ShowAsync();
             }
-            this.btnLogin.IsEnabled = true;
-            this.btnRegister.IsEnabled = true;
-            this.loading.IsActive = false;
         }
 
         private async void btnRegister_Click(object sender, RoutedEventArgs e)
         {
-            this.btnLogin.IsEnabled = false;
-            this.btnRegister.IsEnabled = false;
-            this.loading.IsActive = true;
-            UserAccountService userAccount = new UserAccountService();
-            UserAccountService.RegisterStaus status = await userAccount.Register(txtAccount.Text, txtPassword.Password);
-            if(status==UserAccountService.RegisterStaus.ConflictUserName)
+           if(txtAccount.Text.Length>0&&txtPassword.Password.Length>0)
             {
-                await new MessageBox("已占用的用户名，重更换用户名重新注册", MessageBox.NotifyType.CommonMessage).ShowAsync();
+                this.btnLogin.IsEnabled = false;
+                this.btnRegister.IsEnabled = false;
+                this.loading.IsActive = true;
+                UserAccountService userAccount = new UserAccountService();
+                UserAccountService.RegisterStaus status = await userAccount.Register(txtAccount.Text, txtPassword.Password);
+                if (status == UserAccountService.RegisterStaus.ConflictUserName)
+                {
+                    await new MessageBox("已占用的用户名，重更换用户名重新注册", MessageBox.NotifyType.CommonMessage).ShowAsync();
+                }
+                else if (status == UserAccountService.RegisterStaus.Success)
+                {
+                    await new MessageBox("注册成功！", MessageBox.NotifyType.CommonMessage).ShowAsync();
+                    var vault = new PasswordVault();
+                    vault.Add(new PasswordCredential(resourceName, txtAccount.Text, txtPassword.Password));
+                }
+                else if (status == UserAccountService.RegisterStaus.Failed)
+                {
+                    await new MessageBox("注册失败！", MessageBox.NotifyType.CommonMessage).ShowAsync();
+                }
+                this.btnLogin.IsEnabled = true;
+                this.btnRegister.IsEnabled = true;
+                this.loading.IsActive = false;
             }
-            else if(status==UserAccountService.RegisterStaus.Success)
+           else
             {
-                await new MessageBox("注册成功！", MessageBox.NotifyType.CommonMessage).ShowAsync();
-                var vault = new PasswordVault();
-                vault.Add(new PasswordCredential(resourceName, txtAccount.Text, txtPassword.Password));
+                await new MessageBox("用户名或密码不可为空！", MessageBox.NotifyType.CommonMessage).ShowAsync();
             }
-            else if(status==UserAccountService.RegisterStaus.Failed)
-            {
-                await new MessageBox("注册失败！", MessageBox.NotifyType.CommonMessage).ShowAsync();
-            }
-            this.btnLogin.IsEnabled = true;
-            this.btnRegister.IsEnabled = true;
-            this.loading.IsActive = false;
         }
 
         /// <summary>

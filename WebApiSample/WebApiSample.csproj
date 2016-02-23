@@ -101,17 +101,24 @@
     </Compile>
     <Compile Include="Common\EncriptHelper.cs" />
     <Compile Include="Common\HttpJsonContent.cs" />
+    <Compile Include="Common\ImageHelper.cs" />
     <Compile Include="Common\JsonHelper.cs" />
     <Compile Include="Common\PlugInFilter.cs" />
     <Compile Include="Controls\NavMenuListView.cs" />
     <Compile Include="Controls\PageHeader.xaml.cs">
       <DependentUpon>PageHeader.xaml</DependentUpon>
     </Compile>
+    <Compile Include="FaceRecognizatioin\FaceApiHelper.cs" />
     <Compile Include="Helpers\HttpService.cs" />
     <Compile Include="Helpers\UserAccountService.cs" />
+    <Compile Include="Helpers\WebService.cs" />
     <Compile Include="MessageBox.xaml.cs">
       <DependentUpon>MessageBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Model\FaceInfo.cs" />
+    <Compile Include="Model\FaceListInfo.cs" />
+    <Compile Include="Model\FaceSimilarInfo.cs" />
+    <Compile Include="Model\FaceVerifyInfo.cs" />
     <Compile Include="Model\UserInfo.cs" />
     <Compile Include="NavMenuItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -196,9 +203,7 @@
       <Name>Microsoft Mobile Extension SDK for Universal App Platform</Name>
     </SDKReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="FaceRecognizatioin\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

@@ -92,8 +92,9 @@ namespace WebApiSample.Helpers
                 {
                     if(errorCounter<2)
                     {
-                        await SendGetRequest(url);
                         errorCounter++;
+
+                        await SendGetRequest(url);
                     }
                 }
             }
@@ -123,8 +124,8 @@ namespace WebApiSample.Helpers
                 {
                     if(errorCounter<2)
                     {
-                        await SendPostRequest(url, jsonBody);
                         errorCounter++;
+                        await SendPostRequest(url, jsonBody);
                     }
                 }
             }
