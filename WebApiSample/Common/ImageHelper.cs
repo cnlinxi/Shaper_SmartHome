@@ -31,5 +31,53 @@ namespace WebApiSample.Common
             //imageFace.Source = bitmapSource;
             //}
         }
+
+        public static async Task<StorageFile> PickImageFile()
+        {
+            var picker = new Windows.Storage.Pickers.FileOpenPicker();
+            picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
+            picker.SuggestedStartLocation =
+                Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+            picker.FileTypeFilter.Add(".jpg");
+            picker.FileTypeFilter.Add(".jpeg");
+            picker.FileTypeFilter.Add(".png");
+
+            try
+            {
+                StorageFile file = await picker.PickSingleFileAsync();
+                return file;
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return null;
+        }
+
+        public static async Task<Dictionary<string,StorageFile>> PickImageFileAndType()
+        {
+            var picker = new Windows.Storage.Pickers.FileOpenPicker();
+            picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
+            picker.SuggestedStartLocation =
+                Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+            picker.FileTypeFilter.Add(".jpg");
+            picker.FileTypeFilter.Add(".jpeg");
+            picker.FileTypeFilter.Add(".png");
+
+            try
+            {
+                StorageFile file = await picker.PickSingleFileAsync();
+                Dictionary<string, StorageFile> result = new Dictionary<string, StorageFile>();
+                result.Add(file.FileType, file);
+                return result;
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return null;
+        }
     }
 }

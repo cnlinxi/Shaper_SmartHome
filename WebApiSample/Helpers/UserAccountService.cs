@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using WebApiSample.Common;
 using WebApiSample.FaceRecognizatioin;
 using WebApiSample.Model;
+using Windows.Security.Credentials;
 using Windows.Web.Http;
 
 namespace WebApiSample.Helpers
@@ -13,6 +14,7 @@ namespace WebApiSample.Helpers
     public class UserAccountService
     {
         private string uriRegister = "http://mywebapidemo.azurewebsites.net/api/UserInfo";
+        private string resourceName = "WebApiSample";
 
         /// <summary>
         /// 登录服务
@@ -37,6 +39,12 @@ namespace WebApiSample.Helpers
                 catch { }
             }
             return false;
+        }
+
+        public void Loginout()
+        {
+            PasswordCredential credential = GetCredentialFromLocker();
+            ClearCredentialFromLocker(credential.UserName, credential.Password);
         }
 
         /// <summary>
@@ -81,6 +89,62 @@ namespace WebApiSample.Helpers
             }
             catch { }
             return RegisterStaus.Failed;
+        }
+
+        /// <summary>
+        /// 从凭据保险箱获取凭据
+        /// </summary>
+        /// <returns>无凭据返回空，否则返回PasswordCredential</returns>
+        public PasswordCredential GetCredentialFromLocker()
+        {
+            try
+            {
+                PasswordCredential credential = null;
+
+                var vault = new PasswordVault();
+                var credentialList = vault.FindAllByResource(resourceName);
+                if (credentialList.Count > 0)
+                {
+                    credential = credentialList[0];
+                }
+                return credential;
+            }
+            catch { return null; }
+        }
+
+        public string GetUserNameFromLocker()
+        {
+            PasswordCredential credential = GetCredentialFromLocker();
+            if(credential!=null)
+            {
+                return credential.UserName;
+            }
+            return string.Empty;
+        }
+
+        public void ClearAllCredentialFromLocker()
+        {
+            var vault = new PasswordVault();
+            var credentialList = vault.FindAllByResource(resourceName);
+            if (credentialList.Count > 0)
+            {
+                foreach(var obj in credentialList)
+                {
+                    ClearCredentialFromLocker(obj.UserName, obj.Password);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 从凭据保险箱删除凭据
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="password"></param>
+        public void ClearCredentialFromLocker(string userName,string password)
+        {
+            var vault = new PasswordVault();
+            var credential = new PasswordCredential(resourceName, userName, password);
+            vault.Remove(credential);
         }
 
         public enum RegisterStaus

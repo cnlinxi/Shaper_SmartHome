@@ -17,7 +17,8 @@
     <EnableDotNetNativeCompatibleProfile>true</EnableDotNetNativeCompatibleProfile>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <PackageCertificateKeyFile>WebApiSample_TemporaryKey.pfx</PackageCertificateKeyFile>
+    <PackageCertificateKeyFile>WebApiSample_StoreKey.pfx</PackageCertificateKeyFile>
+    <PackageCertificateThumbprint>D3F32101DF4BF92EA24103A7C455D0EF63C6992E</PackageCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
     <DebugSymbols>true</DebugSymbols>
@@ -109,6 +110,7 @@
       <DependentUpon>PageHeader.xaml</DependentUpon>
     </Compile>
     <Compile Include="FaceRecognizatioin\FaceApiHelper.cs" />
+    <Compile Include="Helpers\BlobHelper.cs" />
     <Compile Include="Helpers\HttpService.cs" />
     <Compile Include="Helpers\UserAccountService.cs" />
     <Compile Include="Helpers\WebService.cs" />
@@ -117,11 +119,16 @@
     </Compile>
     <Compile Include="Model\FaceInfo.cs" />
     <Compile Include="Model\FaceListInfo.cs" />
+    <Compile Include="Model\FaceListNameInfo.cs" />
     <Compile Include="Model\FaceSimilarInfo.cs" />
     <Compile Include="Model\FaceVerifyInfo.cs" />
+    <Compile Include="Model\NotificationInfo.cs" />
     <Compile Include="Model\UserInfo.cs" />
     <Compile Include="NavMenuItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Views\AddFaceToListGuide.xaml.cs">
+      <DependentUpon>AddFaceToListGuide.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Page1.xaml.cs">
       <DependentUpon>Page1.xaml</DependentUpon>
     </Compile>
@@ -142,9 +149,11 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <None Include="WebApiSample_TemporaryKey.pfx" />
+    <None Include="WebApiSample_StoreKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\userAvatorDefault.png" />
+    <None Include="Package.StoreAssociation.xml" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -176,6 +185,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Page>
+    <Page Include="Views\AddFaceToListGuide.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Page1.xaml">
       <Generator>MSBuild:Compile</Generator>

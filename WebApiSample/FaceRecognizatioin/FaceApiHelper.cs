@@ -91,11 +91,11 @@ namespace WebApiSample.FaceRecognizatioin
         }
 
         /// <summary>
-        /// 
+        /// 创建人脸列表
         /// </summary>
-        /// <param name="faceListId"></param>
-        /// <param name="userData"></param>
-        /// <returns></returns>
+        /// <param name="faceListId">需要创建的人脸列表Id</param>
+        /// <param name="userData">人脸列表的附加数据（不填）</param>
+        /// <returns>人脸列表创建状态</returns>
         public async Task<FaceListStatus> FaceListCreate(string faceListId,string userData=null)
         {
             if(faceListId.Length<64)
@@ -161,7 +161,7 @@ namespace WebApiSample.FaceRecognizatioin
                     using (var content = new ByteArrayContent(byteData))
                     {
                         content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
-                        HttpResponseMessage response = await httpClient.PutAsync(uriFaceListAddFace, content);
+                        HttpResponseMessage response = await httpClient.PostAsync(uriFaceListAddFace, content);
                         if (response.StatusCode == HttpStatusCode.OK)
                         {
                             return FaceListStatus.success;
@@ -282,6 +282,12 @@ namespace WebApiSample.FaceRecognizatioin
             return false;
         }
 
+        /// <summary>
+        /// 从FaceList中查找FaceId对应的人脸，返回置信度（0-1）
+        /// </summary>
+        /// <param name="faceId">人脸FaceId</param>
+        /// <param name="faceListId">人脸FaceListId</param>
+        /// <returns>浮点型置信度（0-1）</returns>
         public async Task<double> FaceSimilar(string faceId,string faceListId)
         {
            try
@@ -301,7 +307,10 @@ namespace WebApiSample.FaceRecognizatioin
                     {
                         string jsonResponse = await response.Content.ReadAsStringAsync();
                         JArray jsonArray = JArray.Parse(jsonResponse);
-                        return (double)jsonArray[0]["confidence"];
+                        if(jsonArray.Count>0)
+                        {
+                            return (double)jsonArray[0]["confidence"];
+                        }
                     }
                 }
             }
@@ -315,6 +324,64 @@ namespace WebApiSample.FaceRecognizatioin
                 }
             }
             return -1;
+        }
+
+        /// <summary>
+        /// 在FaceList中查找faceId对应的人脸，若找到返回成员名
+        /// </summary>
+        /// <param name="faceId">人脸Faceld</param>
+        /// <param name="faceListId">人脸FaceIdList</param>
+        /// <returns>若找到，返回成员名，否则返回空字符串</returns>
+        public async Task<string> FaceSimilarWithMemberName(string faceId, string faceListId)
+        {
+            try
+            {
+                httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+                FaceSimilarInfo faceSimilar = new FaceSimilarInfo();
+                faceSimilar.faceId = faceId;
+                faceSimilar.faceListId = faceListId;
+                faceSimilar.maxNumOfCandidatesReturned = 3;
+                string json = JsonHelper.ObjectToJson(faceSimilar);
+                byte[] byteData = Encoding.UTF8.GetBytes(json);
+                using (var content = new ByteArrayContent(byteData))
+                {
+                    content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+                    HttpResponseMessage response = await httpClient.PostAsync(uriFaceSimilar, content);
+                    if (response.StatusCode == HttpStatusCode.OK)
+                    {
+                        string jsonResponse = await response.Content.ReadAsStringAsync();
+                        JArray jsonArray = JArray.Parse(jsonResponse);
+                        if (jsonArray.Count > 0)
+                        {
+                            uriFaceListGetName += faceListId;
+                            response = await httpClient.GetAsync(uriFaceListGetName);
+                            if (response.StatusCode == HttpStatusCode.OK)
+                            {
+                                string strResponse = await response.Content.ReadAsStringAsync();
+                                JObject jsonObject = JObject.Parse(strResponse);
+                                JArray jsonarray = (JArray)jsonObject["persistedFaces"];
+                                foreach (JObject obj in jsonarray)//这里的obj是getFacelist 的Object
+                                {
+                                    if (obj["persistedFaceId"].ToString() == jsonArray[0]["persistedFaceId"].ToString())
+                                    {
+                                        return obj["userData"].ToString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                if (errorCounter < 2)
+                {
+                    errorCounter++;
+
+                    await FaceSimilarWithMemberName(faceId, faceListId);
+                }
+            }
+            return string.Empty;
         }
 
         /// <summary>

@@ -33,10 +33,11 @@ namespace WebApiSample.Views
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
-            var loginCredential = GetCredentialFromLocker();
+            UserAccountService userAccount = new UserAccountService();
+            var loginCredential = userAccount.GetCredentialFromLocker();
             if(loginCredential!=null)
             {
-                MessageDialog messageDialog = new MessageDialog("发现已经登录的账户，是否重新登录？", "消息");
+                MessageDialog messageDialog = new MessageDialog("发现已经登录的账户，是否重新登录？这将导致原账号被清除！", "消息");
                 messageDialog.Commands.Add(new UICommand("确定", new UICommandInvokedHandler(UICommandHandler)));
                 messageDialog.Commands.Add(new UICommand("取消", new UICommandInvokedHandler(UICommandHandler)));
                 await messageDialog.ShowAsync();
@@ -50,6 +51,15 @@ namespace WebApiSample.Views
             if(command.Label== "取消")
             {
                 this.Frame.Navigate(typeof(Page1));
+            }
+            if(command.Label=="确定")
+            {
+                UserAccountService userAccount = new UserAccountService();
+                var loginCredential = userAccount.GetCredentialFromLocker();
+                if(loginCredential!=null)
+                {
+                    userAccount.ClearCredentialFromLocker(loginCredential.UserName, loginCredential.Password);
+                }
             }
         }
 
@@ -113,30 +123,6 @@ namespace WebApiSample.Views
             {
                 await new MessageBox("用户名或密码不可为空！", MessageBox.NotifyType.CommonMessage).ShowAsync();
             }
-        }
-
-        /// <summary>
-        /// 从凭据保险箱获取凭据
-        /// </summary>
-        /// <returns>无凭据返回空，否则返回PasswordCredential</returns>
-        private PasswordCredential GetCredentialFromLocker()
-        {
-            try
-            {
-                PasswordCredential credential = null;
-
-                var vault = new PasswordVault();
-                var credentialList = vault.FindAllByResource(resourceName);
-                if (credentialList.Count > 0)
-                {
-                    if (credentialList.Count == 1)
-                    {
-                        credential = credentialList[0];
-                    }
-                }
-                return credential;
-            }
-            catch { return null; }
         }
 
         private void AppBarButton_Click(object sender, RoutedEventArgs e)
