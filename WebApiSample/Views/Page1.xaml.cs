@@ -98,6 +98,7 @@ namespace WebApiSample.Views
                         NotificationInfo channelModel = new NotificationInfo();
                         channelModel.userName = userName;
                         channelModel.channelUri = channel.Uri;
+                        channelModel.expirationTime = channel.ExpirationTime.DateTime;
                         string strJson = JsonHelper.ObjectToJson(channelModel);
                         HttpService httpService = new HttpService();
                         await httpService.SendPostRequest(notificationHost, strJson);
@@ -230,6 +231,11 @@ namespace WebApiSample.Views
         enum AccoutStatus
         {
             notLogin,success,failed
+        }
+
+        private void FamilyStatue_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        {
+
         }
     }
 }

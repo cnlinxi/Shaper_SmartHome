@@ -10,5 +10,6 @@ namespace WebApiSample.Model
     {
         public string userName { get; set; }
         public  string channelUri { get; set; }
+        public DateTime expirationTime { get; set; }
     }
 }

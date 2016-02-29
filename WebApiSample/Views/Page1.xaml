@@ -94,6 +94,12 @@
                   BorderBrush="Red"
                   ItemTemplate="{StaticResource FaceListNameTemplate}">
         </ListView>
+        <Border Grid.Column="0"
+                Grid.Row="2"
+                x:Name="FamilyStatue"
+                Tapped="FamilyStatue_Tapped">
+            
+        </Border>
         <ProgressRing x:Name="loading"
                       Width="80"
                       Height="80"
