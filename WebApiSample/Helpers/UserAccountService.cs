@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace WebApiSample.Helpers
     {
         private string uriRegister = "http://mywebapidemo.azurewebsites.net/api/UserInfo";
         private string resourceName = "WebApiSample";
+        private string userName = "cmn";
 
         /// <summary>
         /// 登录服务
@@ -43,8 +45,18 @@ namespace WebApiSample.Helpers
 
         public void Loginout()
         {
+            PasswordVault passwordVault = new PasswordVault();
             PasswordCredential credential = GetCredentialFromLocker();
-            ClearCredentialFromLocker(credential.UserName, credential.Password);
+            try
+            {
+                credential = passwordVault.Retrieve(resourceName, credential.UserName);
+                Debug.WriteLine("UserName:" + credential.UserName + "  Password:" + credential.Password);
+                ClearCredentialFromLocker(credential.UserName, credential.Password);
+            }
+            catch
+            {
+
+            }
         }
 
         /// <summary>

@@ -102,6 +102,7 @@
     </Compile>
     <Compile Include="Common\EncriptHelper.cs" />
     <Compile Include="Common\HttpJsonContent.cs" />
+    <Compile Include="Common\HttpServerService.cs" />
     <Compile Include="Common\ImageHelper.cs" />
     <Compile Include="Common\JsonHelper.cs" />
     <Compile Include="Common\PlugInFilter.cs" />
@@ -117,6 +118,7 @@
     <Compile Include="MessageBox.xaml.cs">
       <DependentUpon>MessageBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Model\CommandInfo.cs" />
     <Compile Include="Model\FaceInfo.cs" />
     <Compile Include="Model\FaceListInfo.cs" />
     <Compile Include="Model\FaceListNameInfo.cs" />

@@ -83,6 +83,13 @@ namespace WebApiSample.Views
                     elAvator.Fill = imgBrush;
                 }
             }
+            else
+            {
+                ImageBrush defaultAvatorImg = new ImageBrush();
+                BitmapImage defaultAvatorBitmap = new BitmapImage(new Uri("ms-appx:///Assets/userAvatorDefault.png"));
+                defaultAvatorImg.ImageSource = defaultAvatorBitmap;
+                elAvator.Fill = defaultAvatorImg;
+            }
         }
 
         private async void NotificationInit()
@@ -157,6 +164,7 @@ namespace WebApiSample.Views
             {
                 UserAccountService userAccount = new UserAccountService();
                 userAccount.Loginout();
+                AvatorInit();
             }
         }
 
