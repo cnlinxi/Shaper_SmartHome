@@ -115,6 +115,7 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Model\CommandChannelInfo.cs" />
+    <Compile Include="Model\EmergenceCounterInfo.cs" />
     <Compile Include="Model\EmergencePictureInfo.cs" />
     <Compile Include="Model\FaceInfo.cs" />
     <Compile Include="Model\FaceListInfo.cs" />

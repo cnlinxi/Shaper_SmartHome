@@ -57,5 +57,10 @@ namespace loT4WebApiSample
             //人体传感器关联的Gpio pin
             public const int humanInfrarePinID = 6;
         }
+
+        public static class EmergenceCounter
+        {
+            public const int SendEmergenceCounterDuration = 1;
+        }
     }
 }

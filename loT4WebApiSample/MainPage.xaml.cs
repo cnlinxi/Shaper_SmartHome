@@ -50,6 +50,7 @@ namespace loT4WebApiSample
 
         private DispatcherTimer timer_FaceRecognization;
         private DispatcherTimer timer_DhtSendValue;
+        private DispatcherTimer timer_SendEmergenceCounter;
 
         private bool isGpioValuable = false;
         private bool isDoorbellJustPress = false;
@@ -59,11 +60,13 @@ namespace loT4WebApiSample
         const string commandHost = "http://mywebapidemo.azurewebsites.net/api/Command";
         const string temperatureHost = "http://mywebapidemo.azurewebsites.net/api/Temperature";
         const string notificationHost = "http://mywebapidemo.azurewebsites.net/api/Notification";
+        const string emergenceCounterHost = "http://mywebapidemo.azurewebsites.net/api/EmergenceCounter";
 
         //统计识别失败的次数，每5分钟重置一次
         private int faceRecognizationCount = 0;
 
         private static int EmergenceCount = 0;
+        TimeSpan tsThree = new TimeSpan(3, 0, 0);//早晨3点发送EmergenceCounter
 
         private PushNotificationChannel channel;
         const string CmdOn = "On";
@@ -95,13 +98,20 @@ namespace loT4WebApiSample
 
         public void InitializeTimer()
         {
+            //人脸识别失败次数重置定时器
             timer_FaceRecognization = new DispatcherTimer();
             timer_FaceRecognization.Interval = TimeSpan.FromMinutes(Constants.FaceConstants.FaceRecognizationFailedDuration);
             timer_FaceRecognization.Tick += Timer_FaceRecognization_Tick;
 
+            //Dht11温湿度传感器发送数据定时器
             timer_DhtSendValue = new DispatcherTimer();
             timer_DhtSendValue.Interval = TimeSpan.FromMinutes(Constants.GpioConstants.DhtSendValueDuration);
             timer_DhtSendValue.Tick += Timer_DhtSendValue_Tick;
+
+            //每天发生的威胁次数发送数据定时器
+            timer_SendEmergenceCounter = new DispatcherTimer();
+            timer_SendEmergenceCounter.Interval = TimeSpan.FromHours(Constants.EmergenceCounter.SendEmergenceCounterDuration);
+            timer_SendEmergenceCounter.Tick += Timer_SendEmergenceCounter_Tick;
         }
 
         private async void InitialCommand()
@@ -176,6 +186,29 @@ namespace loT4WebApiSample
             string jsonContent = JsonHelper.ObjectToJson(temperatureInfo);
             HttpService http = new HttpService();
             await http.SendPostRequest(temperatureHost, jsonContent);
+        }
+
+        private async void Timer_SendEmergenceCounter_Tick(object sender, object e)
+        {
+            TimeSpan tsInterval = DateTime.Now.TimeOfDay.Subtract(tsThree);
+            double totalMinitus = tsInterval.TotalMinutes;
+            if(totalMinitus>=0&&totalMinitus<60)
+            {
+                await SendEmergenceCounter();
+            }
+        }
+
+        private async Task SendEmergenceCounter()
+        {
+            if(userName.Length>0)
+            {
+                EmergenceCounterInfo counter = new EmergenceCounterInfo();
+                counter.userName = userName;
+                counter.counter = EmergenceCount.ToString();
+                string jsonContent = JsonHelper.ObjectToJson(counter);
+                HttpService http = new HttpService();
+                await http.SendPostRequest(emergenceCounterHost, jsonContent);
+            }
         }
 
         public void InitializeBlobStorage()
