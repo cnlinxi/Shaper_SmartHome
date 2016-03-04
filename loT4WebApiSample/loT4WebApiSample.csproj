@@ -120,6 +120,7 @@
     <Compile Include="Model\FaceListInfo.cs" />
     <Compile Include="Model\FaceSimilarInfo.cs" />
     <Compile Include="Model\FaceVerifyInfo.cs" />
+    <Compile Include="Model\TemperatureInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

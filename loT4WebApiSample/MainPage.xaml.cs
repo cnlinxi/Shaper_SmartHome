@@ -57,6 +57,8 @@ namespace loT4WebApiSample
         private string userName = "cmn";
         private const string emergencePictureHost = "http://mywebapidemo.azurewebsites.net/api/EmergencyPicture";
         const string notificationHost = "http://mywebapidemo.azurewebsites.net/api/Command";
+        const string temperatureHost = "http://mywebapidemo.azurewebsites.net/api/Temperature";
+
         //统计识别失败的次数，每5分钟重置一次
         private int faceRecognizationCount = 0;
 
@@ -76,7 +78,6 @@ namespace loT4WebApiSample
 
             InitializeTimer();
             InitializeBlobStorage();
-            InitialCommand();
             InitialCommand();
         }
 
@@ -106,7 +107,7 @@ namespace loT4WebApiSample
             {
                 if (userName != string.Empty)
                 {
-                    PushNotificationChannel channel = 
+                    channel = 
                         await PushNotificationChannelManager.CreatePushNotificationChannelForApplicationAsync();
 
                     channel.PushNotificationReceived += Channel_PushNotificationReceived;
@@ -150,13 +151,28 @@ namespace loT4WebApiSample
             if (!isGpioValuable)
                 return;
 
+            if (userName == string.Empty)
+                return;
+
             DhtReading reader = new DhtReading();
             reader = await gpioHelper.GetDht().GetReadingAsync();//开始读取温湿度
             if(reader.IsValid)
             {
                 double temperature = Convert.ToDouble(reader.Temperature);//读取温度
                 double humidity = Convert.ToDouble(reader.Humidity);//读取湿度
+                await SendTemperature(userName, temperature, humidity);
             }
+        }
+
+        public async Task SendTemperature(string userName,double temperature,double humidity)
+        {
+            TemperatureInfo temperatureInfo = new TemperatureInfo();
+            temperatureInfo.userName = userName;
+            temperatureInfo.temperature = temperature;
+            temperatureInfo.humidity = humidity;
+            string jsonContent = JsonHelper.ObjectToJson(temperatureInfo);
+            HttpService http = new HttpService();
+            await http.SendPostRequest(temperatureHost, jsonContent);
         }
 
         public void InitializeBlobStorage()
