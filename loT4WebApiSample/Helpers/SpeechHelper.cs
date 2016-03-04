@@ -18,7 +18,7 @@ namespace loT4WebApiSample.Helpers
         private SpeechSynthesizer synthesizer;
         public SpeechHelper(MediaElement mediaElement)
         {
-            mediaElement = media;
+            media = mediaElement;
             synthesizer = new SpeechSynthesizer();
         }
 

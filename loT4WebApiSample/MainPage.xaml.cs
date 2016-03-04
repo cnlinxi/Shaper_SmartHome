@@ -56,11 +56,14 @@ namespace loT4WebApiSample
 
         private string userName = "cmn";
         private const string emergencePictureHost = "http://mywebapidemo.azurewebsites.net/api/EmergencyPicture";
-        const string notificationHost = "http://mywebapidemo.azurewebsites.net/api/Command";
+        const string commandHost = "http://mywebapidemo.azurewebsites.net/api/Command";
         const string temperatureHost = "http://mywebapidemo.azurewebsites.net/api/Temperature";
+        const string notificationHost = "http://mywebapidemo.azurewebsites.net/api/Notification";
 
         //统计识别失败的次数，每5分钟重置一次
         private int faceRecognizationCount = 0;
+
+        private static int EmergenceCount = 0;
 
         private PushNotificationChannel channel;
         const string CmdOn = "On";
@@ -121,7 +124,7 @@ namespace loT4WebApiSample
                         channelModel.expirationTime = channel.ExpirationTime.DateTime;
                         string strJson = JsonHelper.ObjectToJson(channelModel);
                         HttpService httpService = new HttpService();
-                        await httpService.SendPostRequest(notificationHost, strJson);
+                        await httpService.SendPostRequest(commandHost, strJson);
                         roamdingSettings.Values["channel"] = channel.Uri;
                     }
                 }
@@ -203,7 +206,22 @@ namespace loT4WebApiSample
             if(isGpioValuable)
             {
                 gpioHelper.GetDoorBellPin().ValueChanged += doorbell_ValueChanged;
+                gpioHelper.GetFireAlarm().ValueChanged += FireAlarm_ValueChanged;
+                gpioHelper.GetHumanInfrare().ValueChanged += HumanInfrare_ValueChanged;
             }
+        }
+
+        private void HumanInfrare_ValueChanged(Windows.Devices.Gpio.GpioPin sender, Windows.Devices.Gpio.GpioPinValueChangedEventArgs args)
+        {
+            Debug.WriteLine("HumanInfrare传感器：有人形移动！");
+        }
+
+        private async void FireAlarm_ValueChanged(Windows.Devices.Gpio.GpioPin sender, Windows.Devices.Gpio.GpioPinValueChangedEventArgs args)
+        {
+            ++EmergenceCount;
+            speech.PlayTTS(Constants.SpeechConstants.FireWariningMessage);
+            Debug.WriteLine("FireAlarm传感器：Value发生变化");
+            await SendFireAlarm();//向移动端推送火警通知
         }
 
         private async void doorbell_ValueChanged(Windows.Devices.Gpio.GpioPin sender, Windows.Devices.Gpio.GpioPinValueChangedEventArgs args)
@@ -220,12 +238,15 @@ namespace loT4WebApiSample
             }
         }
 
+        /// <summary>
+        /// 人脸识别
+        /// </summary>
+        /// <returns></returns>
         private async Task BeginFaceRecognization()
         {
-            speech.PlayTTS(Constants.SpeechConstants.GreetingMessage);
-            //人脸识别
-            if (camera.IsInitialized())
+            if (camera.IsInitialized())//检测摄像头是否初始化
             {
+                speech.PlayTTS(Constants.SpeechConstants.GreetingMessage);
                 StorageFile imgFile = await camera.CapturePhoto();
                 FaceInfo faceInfo = await faceApi.FaceDetection(imgFile);
                 string faceListId = EncriptHelper.ToMd5(userName);
@@ -255,6 +276,10 @@ namespace loT4WebApiSample
                     speech.PlayTTS(Constants.SpeechConstants.VisitorNotRecognizedMessage);
                 }
             }
+            else
+            {
+                speech.PlayTTS(Constants.SpeechConstants.NoCameraMessage);
+            }
 
             isDoorbellJustPress = false;
         }
@@ -267,6 +292,26 @@ namespace loT4WebApiSample
             }
         }
 
+        /// <summary>
+        /// 向移动端推送火警通知
+        /// </summary>
+        /// <returns></returns>
+        private async Task SendFireAlarm()
+        {
+            if(userName.Length>0)
+            {
+                string queryString = string.Format("?content={0}&userName={1}",
+                Constants.NotificationConstants.FireWarining, userName);
+                HttpService http = new HttpService();
+                await http.SendGetRequest(notificationHost + queryString);
+            }
+        }
+
+        /// <summary>
+        /// 生成Blob Storage上图片的Uri
+        /// </summary>
+        /// <param name="imgName">图片名</param>
+        /// <returns>Blob storage上图片的Uri</returns>
         public string GnerateEmergencePictureUri(string imgName)
         {
             return "https://myblobsample.blob.core.windows.net/mycontainer/" + imgName;

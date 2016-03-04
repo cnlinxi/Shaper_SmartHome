@@ -15,6 +15,8 @@ namespace loT4WebApiSample.Helpers
         private GpioPin doorlockPin;
         private GpioPin dht11Pin;
         private GpioPin testLedPin;
+        private GpioPin fireAlarmPin;
+        private GpioPin humanInfrarePin;
 
         private IDht dht;
 
@@ -47,12 +49,12 @@ namespace loT4WebApiSample.Helpers
             doorlockPin.Write(GpioPinValue.High);//输入高电压，关闭门锁
 
             //dht11（温湿度传感器）初始化
-            //dht11Pin = gpioController.OpenPin(Constants.GpioConstants.dht11PinID,GpioSharingMode.Exclusive);
-            //if (dht11Pin == null)
-            //    return false;
-            //dht = new Dht11(dht11Pin, GpioPinDriveMode.Input);
-            //if (dht == null)
-            //    return false;
+            dht11Pin = gpioController.OpenPin(Constants.GpioConstants.dht11PinID, GpioSharingMode.Exclusive);
+            if (dht11Pin == null)
+                return false;
+            dht = new Dht11(dht11Pin, GpioPinDriveMode.Input);
+            if (dht == null)
+                return false;
 
             //远程控制示例的LED灯初始化
             testLedPin = gpioController.OpenPin(Constants.GpioConstants.testLedPinID);
@@ -60,6 +62,23 @@ namespace loT4WebApiSample.Helpers
                 return false;
             testLedPin.SetDriveMode(GpioPinDriveMode.Output);
             testLedPin.Write(GpioPinValue.High);//输入高电压，初始关闭状态
+
+            //火焰传感器初始化
+            fireAlarmPin = gpioController.OpenPin(Constants.GpioConstants.fireAlarmPinID);
+            if (fireAlarmPin == null)
+                return false;
+            if(fireAlarmPin.IsDriveModeSupported(GpioPinDriveMode.InputPullDown))
+            {
+                fireAlarmPin.SetDriveMode(GpioPinDriveMode.InputPullDown);
+            }
+
+            humanInfrarePin = gpioController.OpenPin(Constants.GpioConstants.humanInfrarePinID);
+            if (humanInfrarePin == null)
+                return false;
+            if(humanInfrarePin.IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
+            {
+                humanInfrarePin.SetDriveMode(GpioPinDriveMode.InputPullUp);
+            }
             
             return true;
         }
@@ -67,6 +86,16 @@ namespace loT4WebApiSample.Helpers
         public GpioPin GetDoorBellPin()
         {
             return doorbellPin;
+        }
+
+        public GpioPin GetFireAlarm()
+        {
+            return fireAlarmPin;
+        }
+
+        public GpioPin GetHumanInfrare()
+        {
+            return humanInfrarePin;
         }
 
         public IDht GetDht()
