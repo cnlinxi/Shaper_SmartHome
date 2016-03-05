@@ -106,6 +106,7 @@
     <Compile Include="Common\PlugInFilter.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Helpers\BlobHelper.cs" />
+    <Compile Include="Helpers\CommandHelper.cs" />
     <Compile Include="Helpers\FaceApiHelper.cs" />
     <Compile Include="Helpers\GpioHelper.cs" />
     <Compile Include="Helpers\HttpService.cs" />
@@ -122,6 +123,7 @@
     <Compile Include="Model\FaceSimilarInfo.cs" />
     <Compile Include="Model\FaceVerifyInfo.cs" />
     <Compile Include="Model\TemperatureInfo.cs" />
+    <Compile Include="Model\TimingCommandInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -30,28 +30,11 @@ namespace loT4WebApiSample.Helpers
         {
             try
             {
-                ResourceContext speechContext = ResourceContext.GetForCurrentView();
-                speechContext.Languages = new string[] { SpeechSynthesizer.DefaultVoice.Language };
-                synthesizer = new SpeechSynthesizer();
-                var voices = SpeechSynthesizer.AllVoices;
-                if (voices == null) return;
-                VoiceInformation currentVoice = synthesizer.Voice;
-                VoiceInformation voice = null;
-                foreach (VoiceInformation item in voices.OrderBy(p => p.Language))
+                if (media != null && synthesizer != null)
                 {
-                    string tag = item.Language;
-                    if (tag.Equals(speechContext.Languages[0]))
-                    {
-                        voice = item;
-                    }
-                }
-                if (null != voice)
-                {
-                    synthesizer.Voice = voice;
-                    SpeechSynthesisStream synthesisStream = await synthesizer.SynthesizeTextToStreamAsync(message);
-
+                    var stream = await synthesizer.SynthesizeTextToStreamAsync(message);
                     media.AutoPlay = true;
-                    media.SetSource(synthesisStream, synthesisStream.ContentType);
+                    media.SetSource(stream, stream.ContentType);
                     media.Play();
                 }
             }

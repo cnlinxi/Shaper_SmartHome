@@ -62,5 +62,10 @@ namespace loT4WebApiSample
         {
             public const int SendEmergenceCounterDuration = 1;
         }
+        
+        public static class TimingCommand
+        {
+            public const int GetTimingCommandDuration = 5;
+        }
     }
 }

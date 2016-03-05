@@ -22,6 +22,7 @@ using loT4WebApiSample.Model;
 using Windows.Web.Http;
 using Sensors.Dht;
 using Windows.Networking.PushNotifications;
+using Newtonsoft.Json.Linq;
 
 //“空白页”项模板在 http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409 上有介绍
 
@@ -51,6 +52,8 @@ namespace loT4WebApiSample
         private DispatcherTimer timer_FaceRecognization;
         private DispatcherTimer timer_DhtSendValue;
         private DispatcherTimer timer_SendEmergenceCounter;
+        //private DispatcherTimer timer_Test;
+        private DispatcherTimer timer_GetTimingCommand;
 
         private bool isGpioValuable = false;
         private bool isDoorbellJustPress = false;
@@ -61,6 +64,7 @@ namespace loT4WebApiSample
         const string temperatureHost = "http://mywebapidemo.azurewebsites.net/api/Temperature";
         const string notificationHost = "http://mywebapidemo.azurewebsites.net/api/Notification";
         const string emergenceCounterHost = "http://mywebapidemo.azurewebsites.net/api/EmergenceCounter";
+        const string timingCommandHost = "http://mywebapidemo.azurewebsites.net/api/TimingCommand";
 
         //统计识别失败的次数，每5分钟重置一次
         private int faceRecognizationCount = 0;
@@ -84,14 +88,12 @@ namespace loT4WebApiSample
 
             InitializeTimer();
             InitializeBlobStorage();
-            InitialCommand();
+            //InitialCommand();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            //启动Dht发送数据计时器，发送间隔见Constants
-            if (timer_DhtSendValue != null)
-                timer_DhtSendValue.Start();
+
 
             base.OnNavigatedTo(e);
         }
@@ -107,11 +109,54 @@ namespace loT4WebApiSample
             timer_DhtSendValue = new DispatcherTimer();
             timer_DhtSendValue.Interval = TimeSpan.FromMinutes(Constants.GpioConstants.DhtSendValueDuration);
             timer_DhtSendValue.Tick += Timer_DhtSendValue_Tick;
+            timer_DhtSendValue.Start();
 
             //每天发生的威胁次数发送数据定时器
             timer_SendEmergenceCounter = new DispatcherTimer();
             timer_SendEmergenceCounter.Interval = TimeSpan.FromHours(Constants.EmergenceCounter.SendEmergenceCounterDuration);
             timer_SendEmergenceCounter.Tick += Timer_SendEmergenceCounter_Tick;
+            timer_SendEmergenceCounter.Start();
+
+            //远程控制的小灯（现在没有什么解决方案，每5秒询问一次）
+            timer_GetTimingCommand = new DispatcherTimer();
+            timer_GetTimingCommand.Interval = TimeSpan.FromSeconds(Constants.TimingCommand.GetTimingCommandDuration);
+            timer_GetTimingCommand.Tick += Timer_GetTimingCommand_Tick;
+            timer_GetTimingCommand.Start();
+
+            //timer_Test = new DispatcherTimer();
+            //timer_Test.Interval = TimeSpan.FromSeconds(3);
+            //timer_Test.Tick += Timer_Test_Tick;
+            //timer_Test.Start();
+        }
+
+        private async void Timer_GetTimingCommand_Tick(object sender, object e)
+        {
+            HttpService http = new HttpService();
+            string queryString = string.Format("?userName={0}",userName);
+            string response = await http.SendGetRequest(timingCommandHost + queryString);
+            try
+            {
+                if (response.Length <= 0)
+                    return;
+                TimingCommandInfo timingCommand = new TimingCommandInfo();
+                JObject json = JObject.Parse(response);
+                timingCommand.userName = json["userName"].ToString();
+                timingCommand.id = json["id"].ToString();
+                timingCommand.command = json["command"].ToString();
+                timingCommand.addTime = json["addTime"].ToString();
+                if (timingCommand == null || !isGpioValuable)
+                    return;
+                if (timingCommand.command == CmdOn)
+                    gpioHelper.OnTestLED();
+                else
+                    gpioHelper.OffTestLED();
+            }
+            catch { }
+        }
+
+        private void Timer_Test_Tick(object sender, object e)
+        {
+            speech.PlayTTS(Constants.SpeechConstants.GreetingMessage);
         }
 
         private async void InitialCommand()
