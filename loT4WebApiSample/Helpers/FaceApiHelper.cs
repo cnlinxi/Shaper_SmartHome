@@ -340,7 +340,7 @@ namespace loT4WebApiSample.Helpers
                 httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
                 FaceSimilarInfo faceSimilar = new FaceSimilarInfo();
                 faceSimilar.faceId = faceId;
-                faceSimilar.faceListId = faceListId;
+                faceSimilar.faceListId = faceListId.ToLower();
                 faceSimilar.maxNumOfCandidatesReturned = 3;
                 string json = JsonHelper.ObjectToJson(faceSimilar);
                 byte[] byteData = Encoding.UTF8.GetBytes(json);
@@ -354,7 +354,7 @@ namespace loT4WebApiSample.Helpers
                         JArray jsonArray = JArray.Parse(jsonResponse);
                         if (jsonArray.Count > 0)
                         {
-                            uriFaceListGetName += faceListId;
+                            uriFaceListGetName += faceListId.ToLower();
                             response = await httpClient.GetAsync(uriFaceListGetName);
                             if (response.StatusCode == HttpStatusCode.OK)
                             {

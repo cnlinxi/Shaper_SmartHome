@@ -23,6 +23,7 @@ using Windows.Web.Http;
 using Sensors.Dht;
 using Windows.Networking.PushNotifications;
 using Newtonsoft.Json.Linq;
+using Windows.Devices.Gpio;
 
 //“空白页”项模板在 http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409 上有介绍
 
@@ -283,15 +284,26 @@ namespace loT4WebApiSample
             
             if(isGpioValuable)
             {
-                gpioHelper.GetDoorBellPin().ValueChanged += doorbell_ValueChanged;
+                //gpioHelper.GetDoorBellPin().ValueChanged += doorbell_ValueChanged;
                 gpioHelper.GetFireAlarm().ValueChanged += FireAlarm_ValueChanged;
                 gpioHelper.GetHumanInfrare().ValueChanged += HumanInfrare_ValueChanged;
             }
         }
 
-        private void HumanInfrare_ValueChanged(Windows.Devices.Gpio.GpioPin sender, Windows.Devices.Gpio.GpioPinValueChangedEventArgs args)
+        private async void HumanInfrare_ValueChanged(Windows.Devices.Gpio.GpioPin sender, Windows.Devices.Gpio.GpioPinValueChangedEventArgs args)
         {
             Debug.WriteLine("HumanInfrare传感器：有人形移动！");
+
+            if (!isDoorbellJustPress)
+            {
+                if (args.Edge == GpioPinEdge.RisingEdge)
+                {
+                    isDoorbellJustPress = true;
+                    await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () => {
+                        await BeginFaceRecognization();
+                    });
+                }
+            }
         }
 
         private async void FireAlarm_ValueChanged(Windows.Devices.Gpio.GpioPin sender, Windows.Devices.Gpio.GpioPinValueChangedEventArgs args)
@@ -302,19 +314,19 @@ namespace loT4WebApiSample
             await SendFireAlarm();//向移动端推送火警通知
         }
 
-        private async void doorbell_ValueChanged(Windows.Devices.Gpio.GpioPin sender, Windows.Devices.Gpio.GpioPinValueChangedEventArgs args)
-        {
-            if(!isDoorbellJustPress)
-            {
-                if(args.Edge==Windows.Devices.Gpio.GpioPinEdge.FallingEdge)
-                {
-                    isDoorbellJustPress = true;
-                    await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () => {
-                        await BeginFaceRecognization();
-                    });
-                }
-            }
-        }
+        //private async void doorbell_ValueChanged(Windows.Devices.Gpio.GpioPin sender, Windows.Devices.Gpio.GpioPinValueChangedEventArgs args)
+        //{
+        //    if(!isDoorbellJustPress)
+        //    {
+        //        if(args.Edge==Windows.Devices.Gpio.GpioPinEdge.FallingEdge)
+        //        {
+        //            isDoorbellJustPress = true;
+        //            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () => {
+        //                await BeginFaceRecognization();
+        //            });
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// 人脸识别
@@ -322,7 +334,7 @@ namespace loT4WebApiSample
         /// <returns></returns>
         private async Task BeginFaceRecognization()
         {
-            if (camera.IsInitialized())//检测摄像头是否初始化
+            if (camera!=null&&camera.IsInitialized())//检测摄像头是否初始化
             {
                 speech.PlayTTS(Constants.SpeechConstants.GreetingMessage);
                 StorageFile imgFile = await camera.CapturePhoto();

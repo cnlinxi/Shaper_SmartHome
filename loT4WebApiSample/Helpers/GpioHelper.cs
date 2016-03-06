@@ -31,16 +31,16 @@ namespace loT4WebApiSample.Helpers
                 return false;
 
             //门锁及门铃初始化
-            doorbellPin = gpioController.OpenPin(Constants.GpioConstants.doorbellPinID);
-            if(doorbellPin==null)
-            {
-                return false;
-            }
-            doorbellPin.DebounceTimeout = TimeSpan.FromSeconds(25);
-            if(doorbellPin.IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
-            {
-                doorbellPin.SetDriveMode(GpioPinDriveMode.InputPullUp);
-            }
+            //doorbellPin = gpioController.OpenPin(Constants.GpioConstants.doorbellPinID);
+            //if(doorbellPin==null)
+            //{
+            //    return false;
+            //}
+            //doorbellPin.DebounceTimeout = TimeSpan.FromSeconds(25);
+            //if(doorbellPin.IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
+            //{
+            //    doorbellPin.SetDriveMode(GpioPinDriveMode.InputPullUp);
+            //}
 
             doorlockPin = gpioController.OpenPin(Constants.GpioConstants.doorlockPinID);
             if (doorlockPin == null)
@@ -72,9 +72,11 @@ namespace loT4WebApiSample.Helpers
                 fireAlarmPin.SetDriveMode(GpioPinDriveMode.InputPullDown);
             }
 
+            //人体传感器初始化
             humanInfrarePin = gpioController.OpenPin(Constants.GpioConstants.humanInfrarePinID);
             if (humanInfrarePin == null)
                 return false;
+            //humanInfrarePin.DebounceTimeout = TimeSpan.FromSeconds(25);
             if(humanInfrarePin.IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
             {
                 humanInfrarePin.SetDriveMode(GpioPinDriveMode.InputPullUp);
