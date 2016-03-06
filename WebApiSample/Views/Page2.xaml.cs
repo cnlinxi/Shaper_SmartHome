@@ -17,7 +17,7 @@ namespace WebApiSample.Views
         string userName = string.Empty;
         const string CommandTarget = "ShaperloT";
 
-        const string CommandHost = "http://mywebapidemo.azurewebsites.net/api/Command";
+        const string CommandHost = "http://mywebapidemo.azurewebsites.net/api/TimingCommand";
         const string EmergenceCounterHost = "http://mywebapidemo.azurewebsites.net/api/EmergenceCounter";
 
         const string CmdOn = "On";
@@ -32,9 +32,9 @@ namespace WebApiSample.Views
             userName = userAccount.GetUserNameFromLocker();
         }
 
-        protected async override void OnNavigatedTo(NavigationEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            lstEmergenceCounter = await GetEmergenceCounter();//获取到listEmergenceCounter,需要转化再绑定
+            //lstEmergenceCounter = await GetEmergenceCounter();//获取到listEmergenceCounter,需要转化再绑定
 
             base.OnNavigatedTo(e);
         }
@@ -60,11 +60,14 @@ namespace WebApiSample.Views
         {
             if(commandContent!=string.Empty&&userName!=string.Empty)
             {
-                string queryString =string.Format("?userName={0}&commandTarget={1}&commandContent={2}",
-                    userName, CommandTarget, commandContent);
+                string queryString =string.Format("?userName={0}",userName);
                 string url = CommandHost + queryString;
+                TimingCommandInfo timingCommand = new TimingCommandInfo();
+                timingCommand.userName = userName;
+                timingCommand.command = commandContent;
+                string jsonContent = JsonHelper.ObjectToJson(timingCommand);
                 HttpService http = new HttpService();
-                await http.SendGetRequest(url);
+                await http.SendPutRequest(url,jsonContent);
             }
         }
 

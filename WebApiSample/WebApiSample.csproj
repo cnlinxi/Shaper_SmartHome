@@ -126,6 +126,7 @@
     <Compile Include="Model\FaceSimilarInfo.cs" />
     <Compile Include="Model\FaceVerifyInfo.cs" />
     <Compile Include="Model\NotificationInfo.cs" />
+    <Compile Include="Model\TimingCommandInfo.cs" />
     <Compile Include="Model\UserInfo.cs" />
     <Compile Include="NavMenuItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -132,6 +132,31 @@ namespace WebApiSample.Helpers
             return null;
         }
 
+        public async Task<HttpResponseMessage>SendPutRequest(string url,string jsonBody)
+        {
+            if (TryGetUri(url, out uri))
+            {
+                try
+                {
+                    IHttpContent httpContent = new HttpJsonContent(JsonValue.Parse(jsonBody));
+                    HttpResponseMessage response = await httpClient.PutAsync(uri,
+                        httpContent).AsTask(cts.Token);
+                    return response;
+                }
+                catch (OperationCanceledException e)
+                { }
+                catch (Exception ex)
+                {
+                    if (errorCounter < 2)
+                    {
+                        errorCounter++;
+                        await SendPutRequest(url, jsonBody);
+                    }
+                }
+            }
+            return null;
+        }
+
         public void Dispose()
         {
             if (httpClient != null)
