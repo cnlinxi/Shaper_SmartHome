@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace WebApiSample.Model
 {
-    public class EmergenceCounterInfo
+    public class DeviceInitialInfo
     {
         public string userName { get; set; }
-        public string strangerCounter { get; set; }
-        public string fireCounter { get; set; }
-        public string counter { get; set; }
+        public string authCode { get; set; }
     }
 }

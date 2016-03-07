@@ -29,6 +29,9 @@ namespace WebApiSample.Views
     public sealed partial class AddFaceToListGuide : Page
     {
         string UserName = string.Empty;
+
+        private ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+
         public AddFaceToListGuide()
         {
             this.InitializeComponent();
@@ -62,6 +65,7 @@ namespace WebApiSample.Views
                     if(status==FaceApiHelper.FaceListStatus.success)
                     {
                         await new MessageBox("添加成功！", MessageBox.NotifyType.CommonMessage).ShowAsync();
+                        localSettings.Values[Constants.SettingName.IsUpdateFaceList] = true;
                         this.Frame.Navigate(typeof(Page1));
                     }
                     else
@@ -114,8 +118,11 @@ namespace WebApiSample.Views
 
         private void txtMemberName_TextChanged(object sender, TextChangedEventArgs e)
         {
-            this.btnAddFaceFromFile.IsEnabled = true;
-            this.btnAddFaceFromPhoto.IsEnabled = true;
+            if(txtMemberName.Text.Length>0)
+            {
+                this.btnAddFaceFromFile.IsEnabled = true;
+                this.btnAddFaceFromPhoto.IsEnabled = true;
+            }
         }
     }
 }

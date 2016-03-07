@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using System.Xml;
 using WebApiSample.Common;
 using WebApiSample.FaceRecognizatioin;
 using WebApiSample.Helpers;
@@ -28,6 +29,7 @@ namespace WebApiSample.Views
         const string storageAccountKey = "JFyiGqG4Av5U7yc0RYIkvyHDW7taz5hl0TPdFLssZaUejbVKdkJvfhUEXNkfVU2usnEPzBc2MdzrCbvURHzrrQ==";
         const string containerName = "mycontainer";
 
+        const string CommandHost = "http://mywebapidemo.azurewebsites.net/api/TimingCommand";
         const string notificationHost = "http://mywebapidemo.azurewebsites.net/api/Notification";
 
         //本地数据容器，重装可同步
@@ -35,6 +37,8 @@ namespace WebApiSample.Views
         //多平台同步容器
         private StorageFolder roamdingFolder = ApplicationData.Current.RoamingFolder;
         ApplicationDataContainer roamdingSettings = ApplicationData.Current.RoamingSettings;
+        private ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+
         public Page1()
         {
             this.InitializeComponent();
@@ -54,6 +58,9 @@ namespace WebApiSample.Views
 
         private async void FaceListInit()
         {
+            if (localSettings.Values.ContainsKey(Constants.SettingName.IsUpdateFaceList)
+                && (!Convert.ToBoolean(localSettings.Values[Constants.SettingName.IsUpdateFaceList])))
+                return;
             if (userName != string.Empty)
             {
                 FaceApiHelper faceApi = new FaceApiHelper();
@@ -67,6 +74,7 @@ namespace WebApiSample.Views
                     lstfaceListName.Add(faceName);
                 }
                 lvFaceListName.ItemsSource = lstfaceListName;
+                localSettings.Values[Constants.SettingName.IsUpdateFaceList] = false;
             }
         }
 
@@ -111,12 +119,51 @@ namespace WebApiSample.Views
                         await httpService.SendPostRequest(notificationHost, strJson);
                         roamdingSettings.Values["channel"] = channel.Uri;
                     }
+                    channel.PushNotificationReceived += Channel_PushNotificationReceived;
                 }
             }
             catch(Exception ex)
             {
                 Debug.WriteLine(ex.Message);
             }
+        }
+
+        private void Channel_PushNotificationReceived(PushNotificationChannel sender, PushNotificationReceivedEventArgs e)
+        {
+            String notificationContent = String.Empty;
+
+            switch (e.NotificationType)
+            {
+                case PushNotificationType.Badge:
+                    notificationContent = e.BadgeNotification.Content.GetXml();
+                    break;
+
+                case PushNotificationType.Tile:
+                    notificationContent = e.TileNotification.Content.GetXml();
+                    break;
+
+                case PushNotificationType.Toast:
+                    notificationContent = e.ToastNotification.Content.GetXml();
+                    UpdateUIFromToast(notificationContent);
+                    break;
+
+                case PushNotificationType.Raw:
+                    notificationContent = e.RawNotification.Content;
+                    break;
+            }
+        }
+
+        private void UpdateUIFromToast(string notificationContent)
+        {
+            string content = ToastHelper.ParseXml(notificationContent);
+            if (content == string.Empty)
+                return;
+            if(content==Constants.ToastConstants.FireAlarm)
+            {
+                this.btnHomeStatus.Content = "异常";
+                this.btnHomeStatus.Foreground = new SolidColorBrush(Windows.UI.Colors.Red);
+            }
+            tbLastActivity.Text = content;
         }
 
         private void AppBarButton_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
@@ -130,6 +177,9 @@ namespace WebApiSample.Views
                 case "menu1":
                     UserAccountService user = new UserAccountService();
                     user.ClearAllCredentialFromLocker();
+                    break;
+                case "menu2":
+                    this.Frame.Navigate(typeof(InitialDeviceGuide));
                     break;
                 default:
                     break;
@@ -244,6 +294,43 @@ namespace WebApiSample.Views
         private void FamilyStatue_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
 
+        }
+
+        private void btnHomeStatus_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(Page2));
+        }
+
+        private async void toggleLed_Toggled(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            ToggleSwitch toggleLed = sender as ToggleSwitch;
+            loading.IsActive = true;
+
+            if (toggleLed.IsOn)
+            {
+                await SendCommand(Constants.Command.CmdOn);
+            }
+            else
+            {
+                await SendCommand(Constants.Command.CmdOff);
+            }
+
+            loading.IsActive = false;
+        }
+
+        private async Task SendCommand(string commandContent)
+        {
+            if (commandContent != string.Empty && userName != string.Empty)
+            {
+                string queryString = string.Format("?userName={0}", userName);
+                string url = CommandHost + queryString;
+                TimingCommandInfo timingCommand = new TimingCommandInfo();
+                timingCommand.userName = userName;
+                timingCommand.command = commandContent;
+                string jsonContent = JsonHelper.ObjectToJson(timingCommand);
+                HttpService http = new HttpService();
+                await http.SendPutRequest(url, jsonContent);
+            }
         }
     }
 }

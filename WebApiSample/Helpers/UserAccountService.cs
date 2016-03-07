@@ -79,12 +79,27 @@ namespace WebApiSample.Helpers
                 {
                     if (response.StatusCode == HttpStatusCode.Created)
                     {
+                        //注册：人脸识别List
                         FaceApiHelper faceApi = new FaceApiHelper();
                         string facelistId = EncriptHelper.ToMd5(userName);
                         facelistId = facelistId.ToLower();
                         FaceApiHelper.FaceListStatus status = await faceApi.FaceListCreate(facelistId);
                         if (status == FaceApiHelper.FaceListStatus.success)
                         {
+                            //注册：初始化设备表
+                            InitialDeviceHelper initialDevice = new InitialDeviceHelper();
+                            InitialDeviceHelper.InitialDeviceStatus initialDeviceStatus =
+                                await initialDevice.CreateInitialDevice(userName);
+                            if (initialDeviceStatus == InitialDeviceHelper.InitialDeviceStatus.failed)
+                                return RegisterStaus.Failed;
+
+                            // 注册：远程控制命令表
+                            TimingComandInitHelper timingCommand = new TimingComandInitHelper();
+                            TimingComandInitHelper.InitialTimingCommandStatus timingCommandStatus =
+                                await timingCommand.CreateTimingCommand(userName);
+                            if (timingCommandStatus == TimingComandInitHelper.InitialTimingCommandStatus.failed)
+                                return RegisterStaus.Failed;
+
                             return RegisterStaus.Success;
                         }
                         return RegisterStaus.FaceListFailed;

@@ -100,12 +100,16 @@
     <Compile Include="AppShell.xaml.cs">
       <DependentUpon>AppShell.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Common\Constants.cs" />
     <Compile Include="Common\EncriptHelper.cs" />
     <Compile Include="Common\HttpJsonContent.cs" />
     <Compile Include="Common\HttpServerService.cs" />
     <Compile Include="Common\ImageHelper.cs" />
+    <Compile Include="Common\InitialDeviceHelper.cs" />
     <Compile Include="Common\JsonHelper.cs" />
     <Compile Include="Common\PlugInFilter.cs" />
+    <Compile Include="Common\TimingComandInitHelper.cs" />
+    <Compile Include="Common\ToastHelper.cs" />
     <Compile Include="Controls\NavMenuListView.cs" />
     <Compile Include="Controls\PageHeader.xaml.cs">
       <DependentUpon>PageHeader.xaml</DependentUpon>
@@ -119,19 +123,25 @@
       <DependentUpon>MessageBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Model\CommandInfo.cs" />
+    <Compile Include="Model\DeviceInitialInfo.cs" />
     <Compile Include="Model\EmergenceCounterInfo.cs" />
     <Compile Include="Model\FaceInfo.cs" />
     <Compile Include="Model\FaceListInfo.cs" />
     <Compile Include="Model\FaceListNameInfo.cs" />
     <Compile Include="Model\FaceSimilarInfo.cs" />
     <Compile Include="Model\FaceVerifyInfo.cs" />
+    <Compile Include="Model\NameValueItem.cs" />
     <Compile Include="Model\NotificationInfo.cs" />
+    <Compile Include="Model\TemperatureInfo.cs" />
     <Compile Include="Model\TimingCommandInfo.cs" />
     <Compile Include="Model\UserInfo.cs" />
     <Compile Include="NavMenuItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\AddFaceToListGuide.xaml.cs">
       <DependentUpon>AddFaceToListGuide.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\InitialDeviceGuide.xaml.cs">
+      <DependentUpon>InitialDeviceGuide.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Page1.xaml.cs">
       <DependentUpon>Page1.xaml</DependentUpon>
@@ -156,6 +166,7 @@
     <None Include="WebApiSample_StoreKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\toast.jpg" />
     <Content Include="Assets\userAvatorDefault.png" />
     <None Include="Package.StoreAssociation.xml" />
     <Content Include="Properties\Default.rd.xml" />
@@ -191,6 +202,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Page>
     <Page Include="Views\AddFaceToListGuide.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\InitialDeviceGuide.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

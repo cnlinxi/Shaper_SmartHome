@@ -15,6 +15,7 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <CommandBar x:Name="topBar" VerticalAlignment="Top" HorizontalAlignment="Stretch">

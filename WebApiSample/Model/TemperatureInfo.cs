@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace WebApiSample.Model
 {
-    public class EmergenceCounterInfo
+    public class TemperatureInfo
     {
         public string userName { get; set; }
-        public string strangerCounter { get; set; }
-        public string fireCounter { get; set; }
-        public string counter { get; set; }
+        public string temperature { get; set; }
+        public string humidity { get; set; }
     }
 }

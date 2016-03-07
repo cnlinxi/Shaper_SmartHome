@@ -94,12 +94,44 @@
                   BorderBrush="Red"
                   ItemTemplate="{StaticResource FaceListNameTemplate}">
         </ListView>
-        <Border Grid.Column="0"
+        <StackPanel
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"
+            Orientation="Horizontal"
+            Grid.Row="3"
+            Grid.Column="0">
+            <TextBlock
+                Text="状态:"
+                Style="{StaticResource CaptionTextBlockStyle}"/>
+            <HyperlinkButton x:Name="btnHomeStatus"
+                             Content="正常"
+                             Foreground="Green"
+                             FontSize="24"
+                             Click="btnHomeStatus_Click"/>
+        </StackPanel>
+        <Grid Grid.Row="3"
+              Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="最近的活动"
+                        Style="{StaticResource HeaderTextBlockStyle}"/>
+            <TextBlock x:Name="tbLastActivity"
+                       Grid.Row="1"
+                       FontSize="24"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Text="无"/>
+            <ToggleSwitch
                 Grid.Row="2"
-                x:Name="FamilyStatue"
-                Tapped="FamilyStatue_Tapped">
-            
-        </Border>
+                x:Name="toggleLed"
+                Header="LED 开关"
+                IsOn="False"
+                HorizontalAlignment="Center"
+                Toggled="toggleLed_Toggled"/>
+        </Grid>
         <ProgressRing x:Name="loading"
                       Width="80"
                       Height="80"

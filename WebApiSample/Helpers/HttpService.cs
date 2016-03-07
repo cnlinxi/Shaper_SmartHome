@@ -81,8 +81,12 @@ namespace WebApiSample.Helpers
             {
                 try
                 {
-                    string response = await httpClient.GetStringAsync(uri).AsTask(cts.Token);
-                    return response;
+                    HttpResponseMessage response = await httpClient.GetAsync(uri).AsTask(cts.Token);
+                    if(response.StatusCode==HttpStatusCode.Ok)
+                    {
+                        string strResponse = await response.Content.ReadAsStringAsync();
+                        return strResponse;
+                    }
                 }
                 catch(OperationCanceledException e)
                 {
