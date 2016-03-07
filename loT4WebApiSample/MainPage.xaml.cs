@@ -46,6 +46,7 @@ namespace loT4WebApiSample
 
         //本地数据容器，重装可同步
         private StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+        private ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
         //多平台同步容器
         private StorageFolder roamdingFolder = ApplicationData.Current.RoamingFolder;
         ApplicationDataContainer roamdingSettings = ApplicationData.Current.RoamingSettings;
@@ -55,17 +56,19 @@ namespace loT4WebApiSample
         private DispatcherTimer timer_SendEmergenceCounter;
         //private DispatcherTimer timer_Test;
         private DispatcherTimer timer_GetTimingCommand;
+        private DispatcherTimer timer_InitialDevice;
 
         private bool isGpioValuable = false;
         private bool isDoorbellJustPress = false;
 
-        private string userName = "cmn";
+        private string userName = string.Empty;
         private const string emergencePictureHost = "http://mywebapidemo.azurewebsites.net/api/EmergencyPicture";
         const string commandHost = "http://mywebapidemo.azurewebsites.net/api/Command";
         const string temperatureHost = "http://mywebapidemo.azurewebsites.net/api/Temperature";
         const string notificationHost = "http://mywebapidemo.azurewebsites.net/api/Notification";
         const string emergenceCounterHost = "http://mywebapidemo.azurewebsites.net/api/EmergenceCounter";
         const string timingCommandHost = "http://mywebapidemo.azurewebsites.net/api/TimingCommand";
+        const string initialDeviceHost = "http://mywebapidemo.azurewebsites.net/api/InitialDevice";
 
         //统计识别失败的次数，每5分钟重置一次
         private int faceRecognizationCount = 0;
@@ -76,6 +79,9 @@ namespace loT4WebApiSample
         private PushNotificationChannel channel;
         const string CmdOn = "On";
         const string CmdOff = "Off";
+
+        const string ContainerName_UserName = "UserName";
+        private string authCode;
 
         public MainPage()
         {
@@ -94,9 +100,47 @@ namespace loT4WebApiSample
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-
+            if(localSettings.Values.ContainsKey(ContainerName_UserName))
+            {
+                userName = localSettings.Values[ContainerName_UserName].ToString();
+            }
+            else
+            {
+                InitializeDevice();
+            }
 
             base.OnNavigatedTo(e);
+        }
+
+        public void InitializeDevice()
+        {
+            Random random = new Random();
+            authCode = random.Next(00000, 99999).ToString();
+            tbMessage.Text = "你的设备尚未初始化！请至UWP端用户中心输入以下字符，以完成设备初始化：\n"
+                + authCode;
+            timer_InitialDevice = new DispatcherTimer();
+            timer_InitialDevice.Interval = TimeSpan.FromSeconds(17);
+            timer_InitialDevice.Tick += Timer_InitialDevice_Tick;
+            timer_InitialDevice.Start();
+        }
+
+        private async void Timer_InitialDevice_Tick(object sender, object e)
+        {
+            try
+            {
+                HttpService http = new HttpService();
+                string queryString = string.Format("?authCode={0}", authCode);
+                string response = await http.SendGetRequest(initialDeviceHost + queryString);
+                if (response.Length > 0)
+                {
+                    JObject jsonObject = JObject.Parse(response);
+                    userName = jsonObject["userName"].ToString();
+                    localSettings.Values[ContainerName_UserName] = userName;
+                    tbMessage.Text = "你好，" + userName;
+                    timer_InitialDevice.Stop();
+                }
+            }
+            catch { }
         }
 
         public void InitializeTimer()
@@ -132,6 +176,9 @@ namespace loT4WebApiSample
 
         private async void Timer_GetTimingCommand_Tick(object sender, object e)
         {
+            if (userName==string.Empty)
+                return;
+
             HttpService http = new HttpService();
             string queryString = string.Format("?userName={0}",userName);
             string response = await http.SendGetRequest(timingCommandHost + queryString);
@@ -157,7 +204,7 @@ namespace loT4WebApiSample
 
         private void Timer_Test_Tick(object sender, object e)
         {
-            speech.PlayTTS(Constants.SpeechConstants.GreetingMessage);
+            //speech.PlayTTS(Constants.SpeechConstants.GreetingMessage);
         }
 
         private async void InitialCommand()
@@ -281,7 +328,10 @@ namespace loT4WebApiSample
                 isGpioValuable = false;
                 Debug.WriteLine("GPIO controller不可用");
             }
-            
+
+            if (userName == string.Empty)
+                return;
+
             if(isGpioValuable)
             {
                 //gpioHelper.GetDoorBellPin().ValueChanged += doorbell_ValueChanged;
@@ -293,6 +343,8 @@ namespace loT4WebApiSample
         private async void HumanInfrare_ValueChanged(Windows.Devices.Gpio.GpioPin sender, Windows.Devices.Gpio.GpioPinValueChangedEventArgs args)
         {
             Debug.WriteLine("HumanInfrare传感器：有人形移动！");
+            if (userName == string.Empty)
+                return;
 
             if (!isDoorbellJustPress)
             {
@@ -309,7 +361,7 @@ namespace loT4WebApiSample
         private async void FireAlarm_ValueChanged(Windows.Devices.Gpio.GpioPin sender, Windows.Devices.Gpio.GpioPinValueChangedEventArgs args)
         {
             ++EmergenceCount;
-            speech.PlayTTS(Constants.SpeechConstants.FireWariningMessage);
+            await speech.PlayTTS(Constants.SpeechConstants.FireWariningMessage);
             Debug.WriteLine("FireAlarm传感器：Value发生变化");
             await SendFireAlarm();//向移动端推送火警通知
         }
@@ -336,7 +388,7 @@ namespace loT4WebApiSample
         {
             if (camera!=null&&camera.IsInitialized())//检测摄像头是否初始化
             {
-                speech.PlayTTS(Constants.SpeechConstants.GreetingMessage);
+                await speech.PlayTTS(Constants.SpeechConstants.GreetingMessage);
                 StorageFile imgFile = await camera.CapturePhoto();
                 FaceInfo faceInfo = await faceApi.FaceDetection(imgFile);
                 string faceListId = EncriptHelper.ToMd5(userName);
@@ -344,7 +396,7 @@ namespace loT4WebApiSample
                 if(string.Empty!=memberName)//识别成功，有权进入
                 {
                     UnlockDoor();
-                    speech.PlayTTS(Constants.SpeechConstants.GeneralGreetigMessage(memberName));
+                    await speech.PlayTTS(Constants.SpeechConstants.GeneralGreetigMessage(memberName));
                 }
                 else
                 {
@@ -363,12 +415,12 @@ namespace loT4WebApiSample
                             await SendEmergencePictureUri(userName, GnerateEmergencePictureUri(imgName));//发送PictureUri到服务器
                         });
                     }
-                    speech.PlayTTS(Constants.SpeechConstants.VisitorNotRecognizedMessage);
+                    await speech.PlayTTS(Constants.SpeechConstants.VisitorNotRecognizedMessage);
                 }
             }
             else
             {
-                speech.PlayTTS(Constants.SpeechConstants.NoCameraMessage);
+                await speech.PlayTTS(Constants.SpeechConstants.NoCameraMessage);
             }
 
             isDoorbellJustPress = false;
@@ -421,12 +473,12 @@ namespace loT4WebApiSample
             }
         }
 
-        private void mediaElement_Loaded(object sender, RoutedEventArgs e)
+        private async void mediaElement_Loaded(object sender, RoutedEventArgs e)
         {
             if(speech==null)
             {
                 speech = new SpeechHelper(mediaElement);
-                speech.PlayTTS(Constants.SpeechConstants.InitialSpeechMessage);
+                await speech.PlayTTS(Constants.SpeechConstants.InitialSpeechMessage);
             }
             else
             {

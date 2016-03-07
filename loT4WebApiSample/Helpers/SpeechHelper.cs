@@ -26,7 +26,7 @@ namespace loT4WebApiSample.Helpers
         /// 本地语音合成
         /// </summary>
         /// <param name="message">需要合成的字符串</param>
-        public async void PlayTTS(string message)
+        public async Task PlayTTS(string message)
         {
             try
             {

@@ -81,8 +81,13 @@ namespace loT4WebApiSample.Helpers
             {
                 try
                 {
-                    string response = await httpClient.GetStringAsync(uri).AsTask(cts.Token);
-                    return response;
+                    HttpResponseMessage response = await httpClient.GetAsync(uri).AsTask(cts.Token);
+                    if (response.StatusCode == HttpStatusCode.Ok)
+                    {
+                        string strResponse = await response.Content.ReadAsStringAsync();
+                        return strResponse;
+                    }
+                    
                 }
                 catch(OperationCanceledException e)
                 {
@@ -100,6 +105,11 @@ namespace loT4WebApiSample.Helpers
             }
             return string.Empty;
         }
+
+        //public async Task<string> SendGetResponse(string url)
+        //{
+
+        //}
 
         /// <summary>
         /// 发送Post请求（Windows.Web），请求体为json字符串
