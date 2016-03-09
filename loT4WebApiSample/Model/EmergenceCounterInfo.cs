@@ -9,6 +9,7 @@ namespace WebApiSample.Model
     public class EmergenceCounterInfo
     {
         public string userName { get; set; }
-        public string counter { get; set; }
+        public string fireCounter { get; set; }
+        public string strangerCounter { get; set; }
     }
 }

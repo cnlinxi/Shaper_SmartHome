@@ -12,14 +12,12 @@ namespace loT4WebApiSample.Helpers
     /// <summary>
     /// 语音合成，需要结合XAML的SpeechSynthesizer自动播放
     /// </summary>
-    public class SpeechHelper:IDisposable
+    public class SpeechHelper
     {
         private MediaElement media;
-        private SpeechSynthesizer synthesizer;
         public SpeechHelper(MediaElement mediaElement)
         {
             media = mediaElement;
-            synthesizer = new SpeechSynthesizer();
         }
 
         /// <summary>
@@ -30,6 +28,7 @@ namespace loT4WebApiSample.Helpers
         {
             try
             {
+                SpeechSynthesizer synthesizer = new SpeechSynthesizer();
                 if (media != null && synthesizer != null)
                 {
                     var stream = await synthesizer.SynthesizeTextToStreamAsync(message);
@@ -42,11 +41,6 @@ namespace loT4WebApiSample.Helpers
             {
                 //txtMessage.Text = string.Format("Exception发生错误，错误原因：{0}", ex.Message);
             }
-        }
-
-        public void Dispose()
-        {
-            synthesizer.Dispose();
         }
     }
 }

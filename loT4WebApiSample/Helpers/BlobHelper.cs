@@ -81,7 +81,7 @@ namespace loT4WebApiSample.Helpers
         }
 
         /// <summary>
-        /// 从Blob获取文件流
+        /// (已弃用)从Blob获取文件流
         /// </summary>
         /// <param name="strFileName">Blob上文件名称</param>
         /// <returns>IRandomAccessStream</returns>
@@ -110,13 +110,13 @@ namespace loT4WebApiSample.Helpers
         {
             CloudBlockBlob blobSource =
                 cloudBlobContainer.GetBlockBlobReference(strFileName);
-            await blobSource.FetchAttributesAsync();
-            DateTimeOffset? lastModifyTime = blobSource.Properties.LastModified;
+            //await blobSource.FetchAttributesAsync();
+            //DateTimeOffset? lastModifyTime = blobSource.Properties.LastModified;
             //App.avatarLastModifyTime = Convert.ToDateTime(lastModifyTime);
             bool isBlobExist = await blobSource.ExistsAsync();
             if (isBlobExist)
             {
-                roamdingSettings.Values["avatarLastModifyTime"] = lastModifyTime;
+                //roamdingSettings.Values["avatarLastModifyTime"] = lastModifyTime;
                 StorageFile file =
                     await localFolder.CreateFileAsync(strFileName, CreationCollisionOption.ReplaceExisting);
                 await blobSource.DownloadToFileAsync(file);

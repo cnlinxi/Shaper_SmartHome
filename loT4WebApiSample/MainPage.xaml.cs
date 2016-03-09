@@ -73,7 +73,9 @@ namespace loT4WebApiSample
         //统计识别失败的次数，每5分钟重置一次
         private int faceRecognizationCount = 0;
 
-        private static int EmergenceCount = 0;
+        private static int FireCounter = 0;
+        private static int StrangerCounter = 0;
+
         TimeSpan tsThree = new TimeSpan(3, 0, 0);//早晨3点发送EmergenceCounter
 
         private PushNotificationChannel channel;
@@ -116,8 +118,8 @@ namespace loT4WebApiSample
         {
             Random random = new Random();
             authCode = random.Next(00000, 99999).ToString();
-            tbMessage.Text = "你的设备尚未初始化！请至UWP端用户中心输入以下字符，以完成设备初始化：\n"
-                + authCode;
+            tbMessage.Text = "你的设备尚未初始化！请至UWP端用户中心输入以下数字，以完成设备初始化，验证码有效时间30分钟：";
+            tbAuthCode.Text = authCode;
             timer_InitialDevice = new DispatcherTimer();
             timer_InitialDevice.Interval = TimeSpan.FromSeconds(17);
             timer_InitialDevice.Tick += Timer_InitialDevice_Tick;
@@ -136,7 +138,8 @@ namespace loT4WebApiSample
                     JObject jsonObject = JObject.Parse(response);
                     userName = jsonObject["userName"].ToString();
                     localSettings.Values[ContainerName_UserName] = userName;
-                    tbMessage.Text = "你好，" + userName;
+                    tbMessage.Text = "你好，" + userName + "。开启你的利刃智能家居之旅";
+                    tbAuthCode.Text="初始化完成";
                     timer_InitialDevice.Stop();
                 }
             }
@@ -295,9 +298,11 @@ namespace loT4WebApiSample
         {
             if(userName.Length>0)
             {
+                FireCounter = StrangerCounter = 0;
                 EmergenceCounterInfo counter = new EmergenceCounterInfo();
                 counter.userName = userName;
-                counter.counter = EmergenceCount.ToString();
+                counter.fireCounter = FireCounter.ToString();
+                counter.strangerCounter = StrangerCounter.ToString();
                 string jsonContent = JsonHelper.ObjectToJson(counter);
                 HttpService http = new HttpService();
                 await http.SendPostRequest(emergenceCounterHost, jsonContent);
@@ -360,10 +365,10 @@ namespace loT4WebApiSample
 
         private async void FireAlarm_ValueChanged(Windows.Devices.Gpio.GpioPin sender, Windows.Devices.Gpio.GpioPinValueChangedEventArgs args)
         {
-            ++EmergenceCount;
             await speech.PlayTTS(Constants.SpeechConstants.FireWariningMessage);
             Debug.WriteLine("FireAlarm传感器：Value发生变化");
             await SendFireAlarm();//向移动端推送火警通知
+            ++FireCounter;
         }
 
         //private async void doorbell_ValueChanged(Windows.Devices.Gpio.GpioPin sender, Windows.Devices.Gpio.GpioPinValueChangedEventArgs args)
@@ -396,6 +401,7 @@ namespace loT4WebApiSample
                 if(string.Empty!=memberName)//识别成功，有权进入
                 {
                     UnlockDoor();
+                    ToastHelper.SendToast(Constants.ToastConstants.MemberComeBackNotification(memberName), userName);
                     await speech.PlayTTS(Constants.SpeechConstants.GeneralGreetigMessage(memberName));
                 }
                 else
@@ -412,9 +418,11 @@ namespace loT4WebApiSample
                         {
                             string imgName = camera.GenerateUserNameFileName(userName);
                             await blobHelper.uploadImage(imgName, imgFile);//发送图片到Blob Storage
-                            await SendEmergencePictureUri(userName, GnerateEmergencePictureUri(imgName));//发送PictureUri到服务器
+                            await SendEmergencePictureUri(userName, imgName);//发送PictureUri到服务器
+                            ++StrangerCounter;
                         });
                     }
+                    ToastHelper.SendToast(Constants.ToastConstants.VisitorNotRecognizedWarning, userName);
                     await speech.PlayTTS(Constants.SpeechConstants.VisitorNotRecognizedMessage);
                 }
             }
@@ -442,10 +450,11 @@ namespace loT4WebApiSample
         {
             if(userName.Length>0)
             {
-                string queryString = string.Format("?content={0}&userName={1}",
-                Constants.NotificationConstants.FireWarining, userName);
-                HttpService http = new HttpService();
-                await http.SendGetRequest(notificationHost + queryString);
+                //string queryString = string.Format("?content={0}&userName={1}",
+                //Constants.NotificationConstants.FireWarining, userName);
+                //HttpService http = new HttpService();
+                //await http.SendGetRequest(notificationHost + queryString);
+                ToastHelper.SendToast(Constants.ToastConstants.FireWarining,userName);
             }
         }
 
@@ -454,10 +463,10 @@ namespace loT4WebApiSample
         /// </summary>
         /// <param name="imgName">图片名</param>
         /// <returns>Blob storage上图片的Uri</returns>
-        public string GnerateEmergencePictureUri(string imgName)
-        {
-            return "https://myblobsample.blob.core.windows.net/mycontainer/" + imgName;
-        }
+        //public string GnerateEmergencePictureUri(string imgName)
+        //{
+        //    return "https://myblobsample.blob.core.windows.net/mycontainer/" + imgName;
+        //}
 
         private async Task SendEmergencePictureUri(string userName,string pictureUri)
         {

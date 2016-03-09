@@ -10,24 +10,34 @@ namespace loT4WebApiSample
     {
         public static class SpeechConstants
         {
-            public const string InitialSpeechMessage = "语音初始化完成";
-            public const string GreetingMessage = "你好，正在核实你的身份";
+            public const string InitialSpeechMessage = "Welcome！Voice initialization complete";
+            public const string GreetingMessage = "Hello, I am verifying your identity";
 
-            public const string VisitorNotRecognizedMessage = "对不起，你可能无权入内";
-            public const string NoCameraMessage = "对不起，摄像头似乎没有连接";
+            public const string VisitorNotRecognizedMessage = "Sorry, you may not have the right to enter.";
+            public const string NoCameraMessage = "Sorry, the camera seems to be no connection";
 
-            public const string FireWariningMessage = "警报！疑似发生火警";
+            public const string FireWariningMessage = "Alert! Suspected fire";
 
             public static string GeneralGreetigMessage(string visitorName)
             {
-                return visitorName+",欢迎回家";
+                return visitorName+ ",Welcome home";
             }
         }
 
         public static class NotificationConstants
         {
             public const string FireWarining = "警报，家中疑似发生火警";
-        } 
+        }
+        
+        public static class ToastConstants
+        {
+            public const string FireWarining = "警报，家中疑似发生火警";
+            public static string MemberComeBackNotification(string visitorName)
+            {
+                return "你的成员" + visitorName + "，已经回到家中";
+            }
+            public const string VisitorNotRecognizedWarning = "有访客多次未被识别";
+        }
 
         public static class FaceConstants
         {

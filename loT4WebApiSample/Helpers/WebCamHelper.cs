@@ -123,7 +123,7 @@ namespace loT4WebApiSample.Helpers
 
         public string GenerateUserNameFileName(string userName)
         {
-            return EncriptHelper.ToMd5(userName) + DateTime.UtcNow.ToString("yyyy.MMM.dd HH-mm-ss")+".jpg";
+            return userName + DateTime.UtcNow.ToString("yyyy.MMM.dd HH-mm-ss")+".jpg";
         }
 
         /// <summary>

@@ -111,6 +111,7 @@
     <Compile Include="Helpers\GpioHelper.cs" />
     <Compile Include="Helpers\HttpService.cs" />
     <Compile Include="Helpers\SpeechHelper.cs" />
+    <Compile Include="Helpers\ToastHelper.cs" />
     <Compile Include="Helpers\WebCamHelper.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>

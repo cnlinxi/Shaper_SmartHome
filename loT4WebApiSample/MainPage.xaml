@@ -11,9 +11,13 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="2*"/>
-            <RowDefinition/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         <MediaElement x:Name="mediaElement"
+                      AutoPlay="False"
+                      HorizontalAlignment="Left"
+                      VerticalAlignment="Top"
                       Loaded="mediaElement_Loaded"/>
         <CaptureElement x:Name="cameraElement"
                         Grid.Row="1"
@@ -22,6 +26,12 @@
                    Grid.Row="2"
                    Margin="10"
                    TextWrapping="Wrap"
-                   FontSize="24"/>
+                   FontSize="22"/>
+        <TextBlock x:Name="tbAuthCode"
+                   Grid.Row="3"
+                   Margin="10 20"
+                   TextWrapping="Wrap"
+                   Foreground="Red"
+                   FontSize="26"/>
     </Grid>
 </Page>
