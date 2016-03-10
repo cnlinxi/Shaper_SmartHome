@@ -54,7 +54,7 @@ namespace loT4WebApiSample
         private DispatcherTimer timer_FaceRecognization;
         private DispatcherTimer timer_DhtSendValue;
         private DispatcherTimer timer_SendEmergenceCounter;
-        //private DispatcherTimer timer_Test;
+        private DispatcherTimer timer_Test;
         private DispatcherTimer timer_GetTimingCommand;
         private DispatcherTimer timer_InitialDevice;
 
@@ -118,7 +118,7 @@ namespace loT4WebApiSample
         {
             Random random = new Random();
             authCode = random.Next(00000, 99999).ToString();
-            tbMessage.Text = "你的设备尚未初始化！请至UWP端用户中心输入以下数字，以完成设备初始化，验证码有效时间30分钟：";
+            tbMessage.Text = "你的设备尚未初始化！请至PC/Mobile端初始化中心输入以下数字，以完成设备初始化，验证码有效时间30分钟：";
             tbAuthCode.Text = authCode;
             timer_InitialDevice = new DispatcherTimer();
             timer_InitialDevice.Interval = TimeSpan.FromSeconds(17);
@@ -138,7 +138,7 @@ namespace loT4WebApiSample
                     JObject jsonObject = JObject.Parse(response);
                     userName = jsonObject["userName"].ToString();
                     localSettings.Values[ContainerName_UserName] = userName;
-                    tbMessage.Text = "你好，" + userName + "。开启你的利刃智能家居之旅";
+                    tbMessage.Text = "你好，" + userName + "。开启你的Shaper智能家居之旅";
                     tbAuthCode.Text="初始化完成";
                     timer_InitialDevice.Stop();
                 }
@@ -171,10 +171,10 @@ namespace loT4WebApiSample
             timer_GetTimingCommand.Tick += Timer_GetTimingCommand_Tick;
             timer_GetTimingCommand.Start();
 
-            //timer_Test = new DispatcherTimer();
-            //timer_Test.Interval = TimeSpan.FromSeconds(3);
-            //timer_Test.Tick += Timer_Test_Tick;
-            //timer_Test.Start();
+            timer_Test = new DispatcherTimer();
+            timer_Test.Interval = TimeSpan.FromSeconds(30);
+            timer_Test.Tick += Timer_Test_Tick;
+            timer_Test.Start();
         }
 
         private async void Timer_GetTimingCommand_Tick(object sender, object e)
@@ -205,9 +205,9 @@ namespace loT4WebApiSample
             catch { }
         }
 
-        private void Timer_Test_Tick(object sender, object e)
+        private async void Timer_Test_Tick(object sender, object e)
         {
-            //speech.PlayTTS(Constants.SpeechConstants.GreetingMessage);
+            await BeginFaceRecognization();
         }
 
         private async void InitialCommand()
@@ -298,7 +298,6 @@ namespace loT4WebApiSample
         {
             if(userName.Length>0)
             {
-                FireCounter = StrangerCounter = 0;
                 EmergenceCounterInfo counter = new EmergenceCounterInfo();
                 counter.userName = userName;
                 counter.fireCounter = FireCounter.ToString();
@@ -306,6 +305,7 @@ namespace loT4WebApiSample
                 string jsonContent = JsonHelper.ObjectToJson(counter);
                 HttpService http = new HttpService();
                 await http.SendPostRequest(emergenceCounterHost, jsonContent);
+                FireCounter = StrangerCounter = 0;
             }
         }
 
@@ -395,6 +395,7 @@ namespace loT4WebApiSample
             {
                 await speech.PlayTTS(Constants.SpeechConstants.GreetingMessage);
                 StorageFile imgFile = await camera.CapturePhoto();
+                faceApi = new FaceApiHelper();
                 FaceInfo faceInfo = await faceApi.FaceDetection(imgFile);
                 string faceListId = EncriptHelper.ToMd5(userName);
                 string memberName = await faceApi.FaceSimilarWithMemberName(faceInfo.faceId,faceListId);
