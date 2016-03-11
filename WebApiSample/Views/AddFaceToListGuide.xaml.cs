@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using WebApiSample.Common;
+using WebApiSample.Controls;
 using WebApiSample.FaceRecognizatioin;
 using WebApiSample.Helpers;
 using Windows.Foundation;
@@ -66,6 +67,8 @@ namespace WebApiSample.Views
                     {
                         await new MessageBox("添加成功！", MessageBox.NotifyType.CommonMessage).ShowAsync();
                         localSettings.Values[Constants.SettingName.IsUpdateFaceList] = true;
+                        //NavMenuListView item = new NavMenuListView();
+                        //item.SetSelectItem(0);
                         this.Frame.Navigate(typeof(Page1));
                     }
                     else
@@ -99,6 +102,8 @@ namespace WebApiSample.Views
                     if (status == FaceApiHelper.FaceListStatus.success)
                     {
                         await new MessageBox("添加成功！", MessageBox.NotifyType.CommonMessage).ShowAsync();
+                        //NavMenuListView navMenu = new NavMenuListView();
+                        //navMenu.SetSelectItem(0);
                         this.Frame.Navigate(typeof(Page1));
                     }
                     else

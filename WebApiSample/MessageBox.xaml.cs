@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using WebApiSample.FaceRecognizatioin;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -19,7 +20,7 @@ namespace WebApiSample
 {
     public sealed partial class MessageBox : ContentDialog
     {
-        public MessageBox(string content, NotifyType type)
+        public MessageBox(string content, NotifyType type,string name="")
         {
             this.InitializeComponent();
 
@@ -27,7 +28,22 @@ namespace WebApiSample
             {
                 TextBlock tb = new TextBlock();
                 tb.Text = content;
+                tb.TextWrapping = TextWrapping.Wrap;
                 this.rootFrame.Children.Add(tb);
+            }
+
+            if(type==NotifyType.DeleteFaceFromListMessage)
+            {
+                TextBlock tbContent = new TextBlock();
+                tbContent.Text = content;
+                tbContent.TextWrapping = TextWrapping.Wrap;
+                this.rootFrame.Children.Add(tbContent);
+                TextBlock tbName = new TextBlock();
+                tbName.Text = name;
+                tbName.HorizontalAlignment = HorizontalAlignment.Center;
+                tbName.FontSize = 23;
+                tbName.TextWrapping = TextWrapping.Wrap;
+                this.rootFrame.Children.Add(tbName);
             }
         }
 
@@ -41,7 +57,7 @@ namespace WebApiSample
 
         public enum NotifyType
         {
-            CommonMessage
+            CommonMessage,DeleteFaceFromListMessage
         }
     }
 }

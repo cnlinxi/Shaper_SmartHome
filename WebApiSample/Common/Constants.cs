@@ -16,6 +16,7 @@ namespace WebApiSample.Common
         public class SettingName
         {
             public const string IsUpdateFaceList = "isUpdateFaceList";
+            public const string FaceList = "FaceList";
         }
 
         public class Command

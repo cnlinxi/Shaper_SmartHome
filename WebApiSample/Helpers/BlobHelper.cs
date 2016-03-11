@@ -89,16 +89,16 @@ namespace WebApiSample.Helpers
         {
             CloudBlockBlob blobSource =
                 cloudBlobContainer.GetBlockBlobReference(strFileName);
-            await blobSource.FetchAttributesAsync();
-            long fileLength = blobSource.Properties.Length;
-            byte[] bytes = new byte[fileLength];
-            InMemoryRandomAccessStream memoryStream = new InMemoryRandomAccessStream();
-            DataWriter datawriter = new DataWriter(memoryStream.GetOutputStreamAt(0));
-            datawriter.WriteBytes(bytes);
-            await datawriter.StoreAsync();
-            //IRandomAccessStream stream = new InMemoryRandomAccessStream();
-            //await blobSource.DownloadToStreamAsync(stream);
-            return memoryStream;
+            //await blobSource.FetchAttributesAsync();
+            //long fileLength = blobSource.Properties.Length;
+            //byte[] bytes = new byte[fileLength];
+            //InMemoryRandomAccessStream memoryStream = new InMemoryRandomAccessStream();
+            //DataWriter datawriter = new DataWriter(memoryStream.GetOutputStreamAt(0));
+            //datawriter.WriteBytes(bytes);
+            //await datawriter.StoreAsync();
+            IRandomAccessStream stream = new InMemoryRandomAccessStream();
+            await blobSource.DownloadToStreamAsync(stream);
+            return stream;
         }
 
         /// <summary>
@@ -110,13 +110,13 @@ namespace WebApiSample.Helpers
         {
             CloudBlockBlob blobSource =
                 cloudBlobContainer.GetBlockBlobReference(strFileName);
-            await blobSource.FetchAttributesAsync();
-            DateTimeOffset? lastModifyTime = blobSource.Properties.LastModified;
+            //await blobSource.FetchAttributesAsync();
+            //DateTimeOffset? lastModifyTime = blobSource.Properties.LastModified;
             //App.avatarLastModifyTime = Convert.ToDateTime(lastModifyTime);
             bool isBlobExist = await blobSource.ExistsAsync();
             if (isBlobExist)
             {
-                roamdingSettings.Values["avatarLastModifyTime"] = lastModifyTime;
+                //roamdingSettings.Values["avatarLastModifyTime"] = lastModifyTime;
                 StorageFile file =
                     await localFolder.CreateFileAsync(strFileName, CreationCollisionOption.ReplaceExisting);
                 await blobSource.DownloadToFileAsync(file);

@@ -3,7 +3,7 @@
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0",
     "Newtonsoft.Json": "8.0.2",
     "WindowsAzure.Storage": "6.2.0",
-    "WinRTXamlToolkit.Controls.DataVisualization": "2.0.0",
+    "WinRTXamlToolkit.Controls.DataVisualization.UWP": "2.0.0",
     "WinRTXamlToolkit.Controls.Gauge": "2.0.0"
   },
   "frameworks": {

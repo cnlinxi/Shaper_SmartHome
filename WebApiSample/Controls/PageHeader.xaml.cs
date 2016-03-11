@@ -27,13 +27,13 @@ namespace WebApiSample.Controls
             this.Loaded += (s, a) =>
             {
                 AppShell.Current.TogglePaneButtonRectChanged += Current_TogglePaneButtonSizeChanged;
-                this.titleBar.Margin = new Thickness(AppShell.Current.TogglePaneButtonRect.Right, 0, 0, 0);
+                this.titleBar.Margin = new Thickness(AppShell.Current.TogglePaneButtonRect.Right+40, 0, 0, 0);//此处加40个像素，以防止缩小尺寸时汉堡菜单和标题重合的问题
             };
         }
 
         private void Current_TogglePaneButtonSizeChanged(AppShell sender, Rect e)
         {
-            this.titleBar.Margin = new Thickness(e.Right, 0, 0, 0);
+            this.titleBar.Margin = new Thickness(e.Right+40, 0, 0, 0);
         }
 
         public UIElement HeaderContent

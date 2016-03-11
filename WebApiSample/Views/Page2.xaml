@@ -6,6 +6,7 @@
     xmlns:charting="using:WinRTXamlToolkit.Controls.DataVisualization.Charting"
     xmlns:controls="using:WinRTXamlToolkit.Controls"
     xmlns:ctl="using:WebApiSample.Controls"
+    xmlns:datavis="using:WinRTXamlToolkit.Controls.DataVisualization"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
@@ -53,10 +54,12 @@
                 x:Name="gauge_temperature"
                 Maximum="100"
                 Value="20"
+                Margin="20"
                 Unit="温度"
                 Minimum="0"/>
             <controls:Gauge
                 Grid.Column="2"
+                Margin="20"
                 x:Name="gauge_huminity"
                 Value="20"
                 Unit="湿度"
@@ -65,11 +68,10 @@
         <Grid
             Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="3*"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <charting:Chart
-                Grid.Row="1"
                 x:Name="Last3DaysDetail"
                 Margin="20,10">
                 <charting:Chart.LegendStyle>
@@ -117,6 +119,7 @@
             </charting:Chart>
             <Button x:Name="btnShowDetails"
                 Content="显示详情"
+                Grid.Column="1"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Click="btnShowDetails_Click"/>

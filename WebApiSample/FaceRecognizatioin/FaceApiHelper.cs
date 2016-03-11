@@ -184,10 +184,10 @@ namespace WebApiSample.FaceRecognizatioin
             }
         }
 
-        public async Task<List<string>> GetFaceListUserName(string faceListId)
+        public async Task<List<FaceListNameInfo>> GetFaceListUserName(string faceListId)
         {
             faceListId = faceListId.ToLower();
-            List<string> listName = new List<string>();
+            List<FaceListNameInfo> listName = new List<FaceListNameInfo>();
             try
             {
                 httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
@@ -200,8 +200,10 @@ namespace WebApiSample.FaceRecognizatioin
                     JArray jsonArray =(JArray) json["persistedFaces"];
                     foreach(JObject obj in jsonArray)
                     {
-                        string name = obj["userData"].ToString();
-                        listName.Add(name);
+                        FaceListNameInfo nameList = new FaceListNameInfo();
+                        nameList.Name = obj["userData"].ToString();
+                        nameList.FaceId = obj["persistedFaceId"].ToString();
+                        listName.Add(nameList);
                     }
                 }
                 return listName;
@@ -252,6 +254,35 @@ namespace WebApiSample.FaceRecognizatioin
                 }
             }
             return string.Empty;
+        }
+
+        /// <summary>
+        ///  从Facelist中删除人脸
+        /// </summary>
+        /// <param name="faceListId">facelist</param>
+        /// <param name="faceId">已存在的FaceId</param>
+        /// <returns>成功返回true,否则返回false</returns>
+        public async Task<bool> DeleteFaceFromFaceList(string faceListId,string faceId)
+        {
+            faceListId = faceListId.ToLower();
+            try
+            {
+                string queryString = string.Format("{0}/persistedFaces/{1}", faceListId, faceId);
+                uriFaceListDeleteFace += queryString;
+                HttpResponseMessage response = await httpClient.DeleteAsync(uriFaceListDeleteFace);
+                if (response.StatusCode == HttpStatusCode.OK)
+                    return true;
+            }
+            catch
+            {
+                if (errorCounter < 2)
+                {
+                    errorCounter++;
+
+                    await FaceListDeleteFace(faceListId, faceId);
+                }
+            }
+            return false;
         }
 
         public async Task<bool> FaceListDeleteFace(string faceListId,string userName)

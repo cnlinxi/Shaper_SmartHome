@@ -34,7 +34,29 @@ namespace WebApiSample.Views
         protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
             loading.IsActive = true;
-            lstEmergenceCounter = await GetEmergenceCounter();//获取到listEmergenceCounter,需要转化再绑定
+            lstEmergenceCounter = await GetEmergenceCounter();
+            if(lstEmergenceCounter!=null)
+            {
+                bool isZero = true;
+                foreach(var obj in lstEmergenceCounter)
+                {
+                    //现在这样写的原因是IDE变成SB了，不这样我草泥马的编译不过去
+                    if (!obj.counter.ToString().Equals("0"))
+                    {
+                        isZero = false;
+                        break;
+                    }
+                }
+                if(isZero)
+                {
+                    //没有数据，设置图片代替图表
+                }
+                else
+                {
+                    SetChart();
+                }
+            }
+
             temperature = await GetTemperature();
 
             if(temperature!=null)
@@ -42,8 +64,6 @@ namespace WebApiSample.Views
                 gauge_temperature.Value = Convert.ToDouble(temperature.temperature);
                 gauge_huminity.Value = Convert.ToDouble(temperature.humidity);
             }
-
-
 
             loading.IsActive = false;
 
@@ -53,9 +73,11 @@ namespace WebApiSample.Views
         private void SetChart()
         {
             List<NameValueItem> items = new List<NameValueItem>();
-            for(int i=0; ;++i)
+            for(int i=0;i<3;++i)
             {
-                items.Add(new NameValueItem { Name = i.ToString(), Value = Convert.ToInt32(lstEmergenceCounter[i].counter) });
+                //这里乘20只是为了好看而已。。。。
+                items.Add(new NameValueItem { Name = i.ToString(),
+                    Value = 20 * Convert.ToInt32(lstEmergenceCounter[i].counter) });
             }
             AreaSeries series = (AreaSeries)this.Last3DaysDetail.Series[0];
             series.ItemsSource = items;
@@ -151,6 +173,7 @@ namespace WebApiSample.Views
                 HttpService http = new HttpService();
                 string response = await http.SendGetRequest(TemperatureHost + queryString);
                 JObject jsonObject = JObject.Parse(response);
+                temperature = new TemperatureInfo();
                 temperature.temperature = jsonObject["temperature"].ToString();
                 temperature.humidity = jsonObject["humidity"].ToString();
                 return temperature;
@@ -161,7 +184,19 @@ namespace WebApiSample.Views
 
         private void btnShowDetails_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-
+            if (lstEmergenceCounter == null)
+                return;
+            FamilyStatusSumInfo familySum = new FamilyStatusSumInfo();
+            int sumFire = 0;
+            int sumStranger = 0;
+            for(int i=0;i<3;++i)
+            {
+                sumFire +=Convert.ToInt32(lstEmergenceCounter[i].fireCounter);
+                sumStranger += Convert.ToInt32(lstEmergenceCounter[i].strangerCounter);
+            }
+            familySum.FireCounter = sumFire;
+            familySum.StrangerCounter = sumStranger;
+            this.Frame.Navigate(typeof(FamilyStatusDetails), familySum);
         }
     }
 }

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace WebApiSample.Model
 {
-    public class FaceListNameInfo
+    public class FamilyStatusSumInfo
     {
-        public string Name { get; set; }
-        public string FaceId { get; set; }
+        public int FireCounter { get; set; }
+        public int StrangerCounter { get; set; }
     }
 }

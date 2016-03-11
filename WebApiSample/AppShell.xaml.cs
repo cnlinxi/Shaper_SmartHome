@@ -27,26 +27,32 @@ namespace WebApiSample
             {
                 new NavMenuItem()
                 {
-                    Symbol = Symbol.Contact,
-                    Label = "Page1",
+                    Symbol = Symbol.Home,
+                    Label = "主页",
                     DestinationPage = typeof(Views.Page1)
                 },
                 new NavMenuItem()
                 {
-                    Symbol = Symbol.Edit,
-                    Label = "Page2",
+                    Symbol = Symbol.ViewAll,
+                    Label = "控制中心",
                     DestinationPage = typeof(Views.Page2)
                 },
                 new NavMenuItem()
                 {
-                    Symbol = Symbol.Favorite,
-                    Label = "Page3",
+                    Symbol = Symbol.MapDrive,
+                    Label = "初始化中心",
                     DestinationPage = typeof(Views.Page3)
                 },
                 new NavMenuItem()
                 {
-                    Symbol=Symbol.Account,
-                    Label="User Account",
+                    Symbol = Symbol.BlockContact,
+                    Label = "被档访客",
+                    DestinationPage = typeof(Views.StrangerList)
+                },
+                new NavMenuItem()
+                {
+                    Symbol=Symbol.Contact,
+                    Label="用户中心",
                     DestinationPage=typeof(Views.UserAccount)
                 }
             });

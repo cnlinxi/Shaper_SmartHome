@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
 using WebApiSample.Common;
+using WebApiSample.Controls;
 using WebApiSample.FaceRecognizatioin;
 using WebApiSample.Helpers;
 using WebApiSample.Model;
@@ -30,14 +32,18 @@ namespace WebApiSample.Views
         const string containerName = "mycontainer";
 
         const string CommandHost = "http://mywebapidemo.azurewebsites.net/api/TimingCommand";
-        const string notificationHost = "http://mywebapidemo.azurewebsites.net/api/Notification";
+        const string NotificationHost = "http://mywebapidemo.azurewebsites.net/api/Notification";
+        const string TimingCommandHost = "http://mywebapidemo.azurewebsites.net/api/TimingCommand";
 
+        const string CmdOn = "On";
         //本地数据容器，重装可同步
         private StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+
+        private ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+
         //多平台同步容器
         private StorageFolder roamdingFolder = ApplicationData.Current.RoamingFolder;
         ApplicationDataContainer roamdingSettings = ApplicationData.Current.RoamingSettings;
-        private ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
 
         public Page1()
         {
@@ -49,33 +55,56 @@ namespace WebApiSample.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
+            this.loading.IsActive=true;
             FaceListInit();
             AvatorInit();
             NotificationInit();
+            this.loading.IsActive = false;
 
             base.OnNavigatedTo(e);
         }
 
         private async void FaceListInit()
         {
-            if (localSettings.Values.ContainsKey(Constants.SettingName.IsUpdateFaceList)
-                && (!Convert.ToBoolean(localSettings.Values[Constants.SettingName.IsUpdateFaceList])))
-                return;
+            //if (localSettings.Values.ContainsKey(Constants.SettingName.IsUpdateFaceList)
+            //    && (!Convert.ToBoolean(localSettings.Values[Constants.SettingName.IsUpdateFaceList])))
+            //{
+            //    List<FaceListNameInfo> lstfaceListName = 
+            //        (List<FaceListNameInfo>)localSettings.Values[Constants.SettingName.FaceList];
+            //    return;
+            //}
             if (userName != string.Empty)
             {
                 FaceApiHelper faceApi = new FaceApiHelper();
-                List<string> lstMemberName =
+                List<FaceListNameInfo> lstMemberName =
                     await faceApi.GetFaceListUserName(EncriptHelper.ToMd5(userName));
-                List<FaceListNameInfo> lstfaceListName = new List<FaceListNameInfo>();
-                foreach (var obj in lstMemberName)
-                {
-                    FaceListNameInfo faceName = new FaceListNameInfo();
-                    faceName.Name = obj;
-                    lstfaceListName.Add(faceName);
-                }
-                lvFaceListName.ItemsSource = lstfaceListName;
-                localSettings.Values[Constants.SettingName.IsUpdateFaceList] = false;
+                //List<FaceListNameInfo> lstfaceListName = new List<FaceListNameInfo>();
+                //foreach (var obj in lstMemberName)
+                //{
+                //    FaceListNameInfo faceName = new FaceListNameInfo();
+                //    faceName.Name = obj.Name;
+                //    lstfaceListName.Add(faceName);
+                //}
+                lvFaceListName.ItemsSource = lstMemberName;
+                //localSettings.Values[Constants.SettingName.FaceList] = lstfaceListName;
+                //localSettings.Values[Constants.SettingName.IsUpdateFaceList] = false;
             }
+        }
+
+        private async void toggleOpenLEDInit()
+        {
+            try
+            {
+                HttpService http = new HttpService();
+                string queryString = string.Format("?userName={0}", userName);
+                string response = await http.SendGetRequest(TimingCommandHost + queryString);
+                if (response.Length <= 0)
+                    return;
+                JObject jsonObject = JObject.Parse(response);
+                if (jsonObject["command"].ToString() == CmdOn)
+                    toggleLed.IsOn = true;
+            }
+            catch { }
         }
 
         private async void AvatorInit()
@@ -116,7 +145,7 @@ namespace WebApiSample.Views
                         channelModel.expirationTime = channel.ExpirationTime.DateTime;
                         string strJson = JsonHelper.ObjectToJson(channelModel);
                         HttpService httpService = new HttpService();
-                        await httpService.SendPostRequest(notificationHost, strJson);
+                        await httpService.SendPostRequest(NotificationHost, strJson);
                         roamdingSettings.Values["channel"] = channel.Uri;
                     }
                     channel.PushNotificationReceived += Channel_PushNotificationReceived;
@@ -208,7 +237,7 @@ namespace WebApiSample.Views
                 }
                 else
                 {
-                    await new MessageBox("请先登录", MessageBox.NotifyType.CommonMessage).ShowAsync();
+                        await new MessageBox("请先登录", MessageBox.NotifyType.CommonMessage).ShowAsync();
                 }
             }else if(item.Tag.ToString()==Logout)
             {
@@ -298,6 +327,8 @@ namespace WebApiSample.Views
 
         private void btnHomeStatus_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
+            //NavMenuListView navMenu = new NavMenuListView();
+            //navMenu.SetSelectItem(1);
             this.Frame.Navigate(typeof(Page2));
         }
 
@@ -330,6 +361,30 @@ namespace WebApiSample.Views
                 string jsonContent = JsonHelper.ObjectToJson(timingCommand);
                 HttpService http = new HttpService();
                 await http.SendPutRequest(url, jsonContent);
+            }
+        }
+
+        private async void borderAddMember_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        {
+            ContentDialogResult dialogResult =
+                await new MessageBox("是否添加新的成员？", MessageBox.NotifyType.CommonMessage).ShowAsync();
+            if(dialogResult==ContentDialogResult.Primary)
+            {
+                this.Frame.Navigate(typeof(Page3));
+            }
+        }
+
+        private async void lvFaceListName_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            FaceListNameInfo nameInfo = e.ClickedItem as FaceListNameInfo;
+            ContentDialogResult dialogResult =
+                await new MessageBox("是否删除以下的成员？删除后将失去入内的权限", 
+                MessageBox.NotifyType.DeleteFaceFromListMessage, nameInfo.Name).ShowAsync();
+            if(dialogResult==ContentDialogResult.Primary
+                &&userName!=string.Empty)
+            {
+                FaceApiHelper faceApi = new FaceApiHelper();
+                await faceApi.DeleteFaceFromFaceList(EncriptHelper.ToMd5(userName), nameInfo.FaceId);
             }
         }
     }

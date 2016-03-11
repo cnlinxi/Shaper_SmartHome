@@ -103,6 +103,19 @@ namespace WebApiSample.Controls
         }
 
         /// <summary>
+        ///修复页面内跳转无法选中按钮
+        /// </summary>
+        /// <param name="index">希望选中项目的index</param>
+        //public void SetSelectItem(int index)
+        //{
+        //    if(index<this.Items.Count&&index>-1)
+        //    {
+        //        var item = (ListViewItem)this.ContainerFromIndex(index);
+        //        item.IsSelected = true;
+        //    }
+        //}
+
+        /// <summary>
         /// Occurs when an item has been selected
         /// </summary>
         public event EventHandler<ListViewItem> ItemInvoked;

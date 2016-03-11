@@ -161,6 +161,29 @@ namespace WebApiSample.Helpers
             return null;
         }
 
+        public async Task<HttpResponseMessage> SendDeleteRequest(string url)
+        {
+            if (TryGetUri(url, out uri))
+            {
+                try
+                {
+                    HttpResponseMessage response = await httpClient.DeleteAsync(uri).AsTask(cts.Token);
+                    return response;
+                }
+                catch (OperationCanceledException e)
+                { }
+                catch (Exception ex)
+                {
+                    if (errorCounter < 2)
+                    {
+                        errorCounter++;
+                        await SendDeleteRequest(url);
+                    }
+                }
+            }
+            return null;
+        }
+
         public void Dispose()
         {
             if (httpClient != null)

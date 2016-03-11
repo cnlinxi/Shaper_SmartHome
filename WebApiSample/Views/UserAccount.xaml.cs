@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using WebApiSample.Controls;
 using WebApiSample.Helpers;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -50,6 +51,8 @@ namespace WebApiSample.Views
         {
             if(command.Label== "取消")
             {
+                //NavMenuListView navMenu = new NavMenuListView();
+                //navMenu.SetSelectItem(0);
                 this.Frame.Navigate(typeof(Page1));
             }
             if(command.Label=="确定")
@@ -58,7 +61,7 @@ namespace WebApiSample.Views
                 var loginCredential = userAccount.GetCredentialFromLocker();
                 if(loginCredential!=null)
                 {
-                    userAccount.ClearCredentialFromLocker(loginCredential.UserName, loginCredential.Password);
+                    userAccount.Loginout();
                 }
             }
         }
@@ -75,8 +78,11 @@ namespace WebApiSample.Views
                 if (isSuceess)
                 {
                     await new MessageBox("登录成功！", MessageBox.NotifyType.CommonMessage).ShowAsync();
-                    var vault = new PasswordVault();
-                    vault.Add(new PasswordCredential(resourceName, txtAccount.Text, txtPassword.Password));
+                    if((bool)chkSaveUser.IsChecked)
+                    {
+                        var vault = new PasswordVault();
+                        vault.Add(new PasswordCredential(resourceName, txtAccount.Text, txtPassword.Password));
+                    }
                 }
                 else
                 {
@@ -94,13 +100,13 @@ namespace WebApiSample.Views
 
         private async void btnRegister_Click(object sender, RoutedEventArgs e)
         {
-           if(txtAccount.Text.Length>0&&txtPassword.Password.Length>0)
+           if(txtAccount_reg.Text.Length>0&&txtPassword_reg.Password.Length>0)
             {
                 this.btnLogin.IsEnabled = false;
                 this.btnRegister.IsEnabled = false;
                 this.loading.IsActive = true;
                 UserAccountService userAccount = new UserAccountService();
-                UserAccountService.RegisterStaus status = await userAccount.Register(txtAccount.Text, txtPassword.Password);
+                UserAccountService.RegisterStaus status = await userAccount.Register(txtAccount_reg.Text, txtPassword_reg.Password);
                 if (status == UserAccountService.RegisterStaus.ConflictUserName)
                 {
                     await new MessageBox("已占用的用户名，重更换用户名重新注册", MessageBox.NotifyType.CommonMessage).ShowAsync();
@@ -108,8 +114,11 @@ namespace WebApiSample.Views
                 else if (status == UserAccountService.RegisterStaus.Success)
                 {
                     await new MessageBox("注册成功！", MessageBox.NotifyType.CommonMessage).ShowAsync();
-                    var vault = new PasswordVault();
-                    vault.Add(new PasswordCredential(resourceName, txtAccount.Text, txtPassword.Password));
+                    if((bool)chkSaveUser_reg.IsChecked)
+                    {
+                        var vault = new PasswordVault();
+                        vault.Add(new PasswordCredential(resourceName, txtAccount.Text, txtPassword.Password));
+                    }
                 }
                 else if (status == UserAccountService.RegisterStaus.Failed)
                 {
@@ -128,6 +137,18 @@ namespace WebApiSample.Views
         private void AppBarButton_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void btnNavToRegister_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.rootPivot.SelectedIndex > -1)
+                this.rootPivot.SelectedIndex = 1;
+        }
+
+        private void btnNavToLogin_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.rootPivot.SelectedIndex > 0)
+                this.rootPivot.SelectedIndex = 0;
         }
     }
 }

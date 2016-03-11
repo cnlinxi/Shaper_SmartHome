@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using WebApiSample.Common;
+using WebApiSample.Controls;
 using WebApiSample.Helpers;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -53,6 +54,8 @@ namespace WebApiSample.Views
 
         private void hybtnUserAccount_Click(object sender, RoutedEventArgs e)
         {
+            //NavMenuListView navMenu = new NavMenuListView();//debug:选中4号按钮（用户中心）
+            //navMenu.SetSelectItem(4);
             this.Frame.Navigate(typeof(UserAccount));
         }
 

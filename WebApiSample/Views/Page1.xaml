@@ -87,14 +87,35 @@
                 </Button.Flyout>
             </Button>
         </RelativePanel>
-        <ListView x:Name="lvFaceListName"
+        <Grid x:Name="memberList"
+                  Grid.Row="1"
+                  Grid.Column="1"
+                  Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Border Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
+                    Grid.Row="0"
+                    x:Name="borderAddMember"
+                    Tapped="borderAddMember_Tapped">
+                <TextBlock Text="成员列表" Margin="24,8,8,8"
+                           Style="{ThemeResource TitleTextBlockStyle}" />
+            </Border>
+            <ListView x:Name="lvFaceListName"
+                  Grid.Row="1"
+                  ItemClick="lvFaceListName_ItemClick"
+                  ItemTemplate="{StaticResource FaceListNameTemplate}">
+            </ListView>
+        </Grid>
+        <!--<ListView x:Name="lvFaceListName"
                   Grid.Row="1"
                   Grid.Column="1"
                   Margin="10"
-                  BorderBrush="Red"
+                  ItemClick="lvFaceListName_ItemClick"
                   ItemTemplate="{StaticResource FaceListNameTemplate}">
-        </ListView>
-        <StackPanel
+        </ListView>-->
+        <!--<StackPanel
             VerticalAlignment="Center"
             HorizontalAlignment="Center"
             Orientation="Horizontal"
@@ -102,13 +123,29 @@
             Grid.Column="0">
             <TextBlock
                 Text="状态:"
-                Style="{StaticResource CaptionTextBlockStyle}"/>
+                FontSize="24"/>
             <HyperlinkButton x:Name="btnHomeStatus"
                              Content="正常"
                              Foreground="Green"
                              FontSize="24"
                              Click="btnHomeStatus_Click"/>
-        </StackPanel>
+        </StackPanel>-->
+        <RelativePanel
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"
+            Grid.Row="3"
+            Grid.Column="0">
+            <TextBlock
+                x:Name="tbStatus"
+                Text="状态:"
+                FontSize="24"/>
+            <HyperlinkButton x:Name="btnHomeStatus"
+                             Content="正常"
+                             FontSize="18"
+                             Foreground="Green"
+                             RelativePanel.RightOf="tbStatus"
+                             Click="btnHomeStatus_Click"/>
+        </RelativePanel>
         <Grid Grid.Row="3"
               Grid.Column="1">
             <Grid.RowDefinitions>
@@ -129,7 +166,6 @@
                 x:Name="toggleLed"
                 Header="LED 开关"
                 IsOn="False"
-                HorizontalAlignment="Center"
                 Toggled="toggleLed_Toggled"/>
         </Grid>
         <ProgressRing x:Name="loading"
