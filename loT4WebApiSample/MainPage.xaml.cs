@@ -207,7 +207,7 @@ namespace loT4WebApiSample
 
         private async void Timer_Test_Tick(object sender, object e)
         {
-            await BeginFaceRecognization();
+            
         }
 
         private async void InitialCommand()
@@ -477,7 +477,7 @@ namespace loT4WebApiSample
             emergencePicture.pictureUri = pictureUri;
             string jsonContent = JsonHelper.ObjectToJson(emergencePicture);
             HttpResponseMessage response = await httpService.SendPostRequest(emergencePictureHost, jsonContent);
-            if(response.StatusCode!=HttpStatusCode.Ok)
+            if(response.StatusCode!=HttpStatusCode.Created)
             {
                 Debug.WriteLine("EmergencePicture发送失败：" + response.Content);
             }
