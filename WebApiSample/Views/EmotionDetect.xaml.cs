@@ -107,6 +107,7 @@ namespace WebApiSample
                 return;
             await speech.PlayTTS(SpeechContent.PreStart);
             await Task.Delay(1000);
+
             btnStart.Visibility = Visibility.Collapsed;
             tbEmotionTip.Visibility = Visibility.Visible;
 
