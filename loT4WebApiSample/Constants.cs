@@ -75,7 +75,7 @@ namespace loT4WebApiSample
         
         public static class TimingCommand
         {
-            public const int GetTimingCommandDuration = 5;
+            public const int GetTimingCommandDuration = 15;
         }
     }
 }

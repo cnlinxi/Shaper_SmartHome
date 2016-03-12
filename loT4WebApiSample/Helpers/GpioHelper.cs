@@ -11,7 +11,7 @@ namespace loT4WebApiSample.Helpers
     public class GpioHelper
     {
         private GpioController gpioController;
-        private GpioPin doorbellPin;
+        //private GpioPin doorbellPin;
         private GpioPin doorlockPin;
         private GpioPin dht11Pin;
         private GpioPin testLedPin;
@@ -85,10 +85,10 @@ namespace loT4WebApiSample.Helpers
             return true;
         }
 
-        public GpioPin GetDoorBellPin()
-        {
-            return doorbellPin;
-        }
+        //public GpioPin GetDoorBellPin()
+        //{
+        //    return doorbellPin;
+        //}
 
         public GpioPin GetFireAlarm()
         {

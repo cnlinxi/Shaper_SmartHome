@@ -68,9 +68,12 @@ namespace loT4WebApiSample.Helpers
                             //解析返回的json,只取图片中第一个人的人脸数据
                             FaceInfo face = new FaceInfo();
                             JArray jsonArray = (JArray)JsonConvert.DeserializeObject(strResponce);
-                            face.faceId = jsonArray[0]["faceId"].ToString();/////此处代码维护性差，一旦api改动，此处可能需要修改！！！！
-                            face.faceRectangle = jsonArray[0]["faceRectangle"].ToString();
-                            return face;
+                            if(jsonArray.Count>0)
+                            {
+                                face.faceId = jsonArray[0]["faceId"].ToString();/////此处代码维护性差，一旦api改动，此处可能需要修改！！！！
+                                face.faceRectangle = jsonArray[0]["faceRectangle"].ToString();
+                                return face;
+                            }
                         }
                         else
                         {

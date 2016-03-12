@@ -54,7 +54,7 @@ namespace loT4WebApiSample
         private DispatcherTimer timer_FaceRecognization;
         private DispatcherTimer timer_DhtSendValue;
         private DispatcherTimer timer_SendEmergenceCounter;
-        private DispatcherTimer timer_Test;
+        //private DispatcherTimer timer_Test;
         private DispatcherTimer timer_GetTimingCommand;
         private DispatcherTimer timer_InitialDevice;
 
@@ -105,6 +105,7 @@ namespace loT4WebApiSample
             if(localSettings.Values.ContainsKey(ContainerName_UserName))
             {
                 userName = localSettings.Values[ContainerName_UserName].ToString();
+                tbMessage.Text = "你好，" + userName;
             }
             else
             {
@@ -117,7 +118,7 @@ namespace loT4WebApiSample
         public void InitializeDevice()
         {
             Random random = new Random();
-            authCode = random.Next(00000, 99999).ToString();
+            authCode = random.Next(10000, 99999).ToString();
             tbMessage.Text = "你的设备尚未初始化！请至PC/Mobile端初始化中心输入以下数字，以完成设备初始化，验证码有效时间30分钟：";
             tbAuthCode.Text = authCode;
             timer_InitialDevice = new DispatcherTimer();
@@ -171,10 +172,10 @@ namespace loT4WebApiSample
             timer_GetTimingCommand.Tick += Timer_GetTimingCommand_Tick;
             timer_GetTimingCommand.Start();
 
-            timer_Test = new DispatcherTimer();
-            timer_Test.Interval = TimeSpan.FromSeconds(30);
-            timer_Test.Tick += Timer_Test_Tick;
-            timer_Test.Start();
+            //timer_Test = new DispatcherTimer();
+            //timer_Test.Interval = TimeSpan.FromSeconds(30);
+            //timer_Test.Tick += Timer_Test_Tick;
+            //timer_Test.Start();
         }
 
         private async void Timer_GetTimingCommand_Tick(object sender, object e)
@@ -334,9 +335,6 @@ namespace loT4WebApiSample
                 Debug.WriteLine("GPIO controller不可用");
             }
 
-            if (userName == string.Empty)
-                return;
-
             if(isGpioValuable)
             {
                 //gpioHelper.GetDoorBellPin().ValueChanged += doorbell_ValueChanged;
@@ -359,6 +357,7 @@ namespace loT4WebApiSample
                     await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () => {
                         await BeginFaceRecognization();
                     });
+                    isDoorbellJustPress = false;
                 }
             }
         }
@@ -391,18 +390,20 @@ namespace loT4WebApiSample
         /// <returns></returns>
         private async Task BeginFaceRecognization()
         {
-            if (camera!=null&&camera.IsInitialized())//检测摄像头是否初始化
+            if (camera!=null&&camera.IsInitialized()&&speech!=null)//检测摄像头是否初始化
             {
                 await speech.PlayTTS(Constants.SpeechConstants.GreetingMessage);
                 StorageFile imgFile = await camera.CapturePhoto();
                 faceApi = new FaceApiHelper();
                 FaceInfo faceInfo = await faceApi.FaceDetection(imgFile);
+                if (faceInfo == null||userName==string.Empty)
+                    return;
                 string faceListId = EncriptHelper.ToMd5(userName);
                 string memberName = await faceApi.FaceSimilarWithMemberName(faceInfo.faceId,faceListId);
                 if(string.Empty!=memberName)//识别成功，有权进入
                 {
                     UnlockDoor();
-                    ToastHelper.SendToast(Constants.ToastConstants.MemberComeBackNotification(memberName), userName);
+                    await ToastHelper.SendToast(Constants.ToastConstants.MemberComeBackNotification(memberName), userName);
                     await speech.PlayTTS(Constants.SpeechConstants.GeneralGreetigMessage(memberName));
                 }
                 else
@@ -423,7 +424,7 @@ namespace loT4WebApiSample
                             ++StrangerCounter;
                         });
                     }
-                    ToastHelper.SendToast(Constants.ToastConstants.VisitorNotRecognizedWarning, userName);
+                    await ToastHelper.SendToast(Constants.ToastConstants.VisitorNotRecognizedWarning, userName);
                     await speech.PlayTTS(Constants.SpeechConstants.VisitorNotRecognizedMessage);
                 }
             }
@@ -455,7 +456,7 @@ namespace loT4WebApiSample
                 //Constants.NotificationConstants.FireWarining, userName);
                 //HttpService http = new HttpService();
                 //await http.SendGetRequest(notificationHost + queryString);
-                ToastHelper.SendToast(Constants.ToastConstants.FireWarining,userName);
+                await ToastHelper.SendToast(Constants.ToastConstants.FireWarining,userName);
             }
         }
 
