@@ -60,6 +60,10 @@ namespace loT4WebApiSample
 
         private bool isGpioValuable = false;
         private bool isDoorbellJustPress = false;
+        private bool isTemperatureJustSend = false;
+        private bool isTimingCommandJustGet = false;
+        private bool isEmergenceCounterJustSend = false;
+        private bool isFireAlarmJustSend = false;
 
         private string userName = string.Empty;
         private const string emergencePictureHost = "http://mywebapidemo.azurewebsites.net/api/EmergencyPicture";
@@ -166,7 +170,7 @@ namespace loT4WebApiSample
             timer_SendEmergenceCounter.Tick += Timer_SendEmergenceCounter_Tick;
             timer_SendEmergenceCounter.Start();
 
-            //远程控制的小灯（现在没有什么解决方案，每5秒询问一次）
+            //远程控制的小灯（现在没有什么解决方案，每3秒询问一次）
             timer_GetTimingCommand = new DispatcherTimer();
             timer_GetTimingCommand.Interval = TimeSpan.FromSeconds(Constants.TimingCommand.GetTimingCommandDuration);
             timer_GetTimingCommand.Tick += Timer_GetTimingCommand_Tick;
@@ -182,6 +186,11 @@ namespace loT4WebApiSample
         {
             if (userName==string.Empty)
                 return;
+
+            if (isTimingCommandJustGet)
+                return;
+
+            isTimingCommandJustGet = true;
 
             HttpService http = new HttpService();
             string queryString = string.Format("?userName={0}",userName);
@@ -203,7 +212,12 @@ namespace loT4WebApiSample
                 else
                     gpioHelper.OffTestLED();
             }
-            catch { }
+            catch
+            {
+                isTimingCommandJustGet = false;
+            }
+
+            isTimingCommandJustGet = false;
         }
 
         private async void Timer_Test_Tick(object sender, object e)
@@ -264,14 +278,28 @@ namespace loT4WebApiSample
             if (userName == string.Empty)
                 return;
 
-            DhtReading reader = new DhtReading();
-            reader = await gpioHelper.GetDht().GetReadingAsync();//开始读取温湿度
-            if(reader.IsValid)
+            if (isTemperatureJustSend)
+                return;
+
+            isTemperatureJustSend = true;
+
+            try
             {
-                double temperature = Convert.ToDouble(reader.Temperature);//读取温度
-                double humidity = Convert.ToDouble(reader.Humidity);//读取湿度
-                await SendTemperature(userName, temperature, humidity);
+                DhtReading reader = new DhtReading();
+                reader = await gpioHelper.GetDht().GetReadingAsync();//开始读取温湿度
+                if (reader.IsValid)
+                {
+                    double temperature = Convert.ToDouble(reader.Temperature);//读取温度
+                    double humidity = Convert.ToDouble(reader.Humidity);//读取湿度
+                    await SendTemperature(userName, temperature, humidity);
+                }
             }
+            catch
+            {
+                isTemperatureJustSend = false;
+            }
+            
+            isTemperatureJustSend = false;
         }
 
         public async Task SendTemperature(string userName,double temperature,double humidity)
@@ -287,12 +315,23 @@ namespace loT4WebApiSample
 
         private async void Timer_SendEmergenceCounter_Tick(object sender, object e)
         {
-            TimeSpan tsInterval = DateTime.Now.TimeOfDay.Subtract(tsThree);
-            double totalMinitus = tsInterval.TotalMinutes;
-            if(totalMinitus>=0&&totalMinitus<60)
+            if (isEmergenceCounterJustSend)
+                return;
+            try
             {
-                await SendEmergenceCounter();
+                TimeSpan tsInterval = DateTime.Now.TimeOfDay.Subtract(tsThree);
+                double totalMinitus = tsInterval.TotalMinutes;
+                if (totalMinitus >= 0 && totalMinitus < 60)
+                {
+                    await SendEmergenceCounter();
+                }
             }
+            catch
+            {
+                isEmergenceCounterJustSend = false;
+            }
+
+            isEmergenceCounterJustSend = false;
         }
 
         private async Task SendEmergenceCounter()
@@ -354,7 +393,9 @@ namespace loT4WebApiSample
                 if (args.Edge == GpioPinEdge.RisingEdge)
                 {
                     isDoorbellJustPress = true;
-                    await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () => {
+
+                    await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
+                    {
                         await BeginFaceRecognization();
                     });
                     isDoorbellJustPress = false;
@@ -364,10 +405,22 @@ namespace loT4WebApiSample
 
         private async void FireAlarm_ValueChanged(Windows.Devices.Gpio.GpioPin sender, Windows.Devices.Gpio.GpioPinValueChangedEventArgs args)
         {
-            await speech.PlayTTS(Constants.SpeechConstants.FireWariningMessage);
-            Debug.WriteLine("FireAlarm传感器：Value发生变化");
-            await SendFireAlarm();//向移动端推送火警通知
-            ++FireCounter;
+            if (isFireAlarmJustSend)
+                return;
+
+            try
+            {
+                await speech.PlayTTS(Constants.SpeechConstants.FireWariningMessage);
+                Debug.WriteLine("FireAlarm传感器：Value发生变化");
+                await SendFireAlarm();//向移动端推送火警通知
+                ++FireCounter;
+            }
+            catch
+            {
+                isFireAlarmJustSend = false;
+            }
+
+            isFireAlarmJustSend = false;
         }
 
         //private async void doorbell_ValueChanged(Windows.Devices.Gpio.GpioPin sender, Windows.Devices.Gpio.GpioPinValueChangedEventArgs args)
@@ -395,6 +448,8 @@ namespace loT4WebApiSample
                 await speech.PlayTTS(Constants.SpeechConstants.GreetingMessage);
                 StorageFile imgFile = await camera.CapturePhoto();
                 faceApi = new FaceApiHelper();
+                if (imgFile == null||faceApi==null)
+                    return;
                 FaceInfo faceInfo = await faceApi.FaceDetection(imgFile);
                 if (faceInfo == null||userName==string.Empty)
                     return;

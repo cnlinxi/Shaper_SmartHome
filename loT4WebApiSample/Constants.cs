@@ -56,7 +56,7 @@ namespace loT4WebApiSample
 
             //dht11(温湿度传感器)关联的Gpio pin
             public const int dht11PinID = 12;
-            public const int DhtSendValueDuration = 5;
+            public const int DhtSendValueDuration = 30;
 
             //远程控制的LED关联的Gpio Pin
             public const int testLedPinID =26;
