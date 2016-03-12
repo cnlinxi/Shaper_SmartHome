@@ -192,30 +192,33 @@ namespace loT4WebApiSample
 
             isTimingCommandJustGet = true;
 
-            HttpService http = new HttpService();
-            string queryString = string.Format("?userName={0}",userName);
-            string response = await http.SendGetRequest(timingCommandHost + queryString);
-            try
+            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
             {
-                if (response.Length <= 0)
-                    return;
-                TimingCommandInfo timingCommand = new TimingCommandInfo();
-                JObject json = JObject.Parse(response);
-                timingCommand.userName = json["userName"].ToString();
-                timingCommand.id = json["id"].ToString();
-                timingCommand.command = json["command"].ToString();
-                timingCommand.addTime = json["addTime"].ToString();
-                if (timingCommand == null || !isGpioValuable)
-                    return;
-                if (timingCommand.command == CmdOn)
-                    gpioHelper.OnTestLED();
-                else
-                    gpioHelper.OffTestLED();
-            }
-            catch
-            {
-                isTimingCommandJustGet = false;
-            }
+                HttpService http = new HttpService();
+                string queryString = string.Format("?userName={0}", userName);
+                string response = await http.SendGetRequest(timingCommandHost + queryString);
+                try
+                {
+                    if (response.Length <= 0)
+                        return;
+                    TimingCommandInfo timingCommand = new TimingCommandInfo();
+                    JObject json = JObject.Parse(response);
+                    timingCommand.userName = json["userName"].ToString();
+                    timingCommand.id = json["id"].ToString();
+                    timingCommand.command = json["command"].ToString();
+                    timingCommand.addTime = json["addTime"].ToString();
+                    if (timingCommand == null || !isGpioValuable)
+                        return;
+                    if (timingCommand.command == CmdOn)
+                        gpioHelper.OnTestLED();
+                    else
+                        gpioHelper.OffTestLED();
+                }
+                catch
+                {
+                    isTimingCommandJustGet = false;
+                }
+            });
 
             isTimingCommandJustGet = false;
         }
@@ -283,70 +286,86 @@ namespace loT4WebApiSample
 
             isTemperatureJustSend = true;
 
-            try
+            await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Idle,async ()=>
             {
-                DhtReading reader = new DhtReading();
-                reader = await gpioHelper.GetDht().GetReadingAsync();//开始读取温湿度
-                if (reader.IsValid)
+                try
                 {
-                    double temperature = Convert.ToDouble(reader.Temperature);//读取温度
-                    double humidity = Convert.ToDouble(reader.Humidity);//读取湿度
-                    await SendTemperature(userName, temperature, humidity);
+                    DhtReading reader = new DhtReading();
+                    reader = await gpioHelper.GetDht().GetReadingAsync();//开始读取温湿度
+                    if (reader.IsValid)
+                    {
+                        double temperature = Convert.ToDouble(reader.Temperature);//读取温度
+                        double humidity = Convert.ToDouble(reader.Humidity);//读取湿度
+                        await SendTemperature(userName, temperature, humidity);
+                    }
                 }
-            }
-            catch
-            {
-                isTemperatureJustSend = false;
-            }
+                catch
+                {
+                    isTemperatureJustSend = false;
+                }
+            });
             
             isTemperatureJustSend = false;
         }
 
         public async Task SendTemperature(string userName,double temperature,double humidity)
         {
-            TemperatureInfo temperatureInfo = new TemperatureInfo();
-            temperatureInfo.userName = userName;
-            temperatureInfo.temperature = temperature;
-            temperatureInfo.humidity = humidity;
-            string jsonContent = JsonHelper.ObjectToJson(temperatureInfo);
-            HttpService http = new HttpService();
-            await http.SendPostRequest(temperatureHost, jsonContent);
+            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Idle, async () =>
+             {
+                 try
+                 {
+                     TemperatureInfo temperatureInfo = new TemperatureInfo();
+                     temperatureInfo.userName = userName;
+                     temperatureInfo.temperature = temperature;
+                     temperatureInfo.humidity = humidity;
+                     string jsonContent = JsonHelper.ObjectToJson(temperatureInfo);
+                     HttpService http = new HttpService();
+                     await http.SendPostRequest(temperatureHost, jsonContent);
+                 }
+                 catch { }
+             });
         }
 
         private async void Timer_SendEmergenceCounter_Tick(object sender, object e)
         {
             if (isEmergenceCounterJustSend)
                 return;
-            try
+            await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Idle, async () =>
             {
-                TimeSpan tsInterval = DateTime.Now.TimeOfDay.Subtract(tsThree);
-                double totalMinitus = tsInterval.TotalMinutes;
-                if (totalMinitus >= 0 && totalMinitus < 60)
+                try
                 {
-                    await SendEmergenceCounter();
+                    TimeSpan tsInterval = DateTime.Now.TimeOfDay.Subtract(tsThree);
+                    double totalMinitus = tsInterval.TotalMinutes;
+                    if (totalMinitus >= 0 && totalMinitus < 60)
+                    {
+                        await SendEmergenceCounter();
+                    }
                 }
-            }
-            catch
-            {
-                isEmergenceCounterJustSend = false;
-            }
+                catch
+                {
+                    isEmergenceCounterJustSend = false;
+                }
+            });
 
             isEmergenceCounterJustSend = false;
         }
 
         private async Task SendEmergenceCounter()
         {
-            if(userName.Length>0)
-            {
-                EmergenceCounterInfo counter = new EmergenceCounterInfo();
-                counter.userName = userName;
-                counter.fireCounter = FireCounter.ToString();
-                counter.strangerCounter = StrangerCounter.ToString();
-                string jsonContent = JsonHelper.ObjectToJson(counter);
-                HttpService http = new HttpService();
-                await http.SendPostRequest(emergenceCounterHost, jsonContent);
-                FireCounter = StrangerCounter = 0;
-            }
+            await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Idle, async () =>
+             {
+                 if (userName.Length > 0)
+                 {
+                     EmergenceCounterInfo counter = new EmergenceCounterInfo();
+                     counter.userName = userName;
+                     counter.fireCounter = FireCounter.ToString();
+                     counter.strangerCounter = StrangerCounter.ToString();
+                     string jsonContent = JsonHelper.ObjectToJson(counter);
+                     HttpService http = new HttpService();
+                     await http.SendPostRequest(emergenceCounterHost, jsonContent);
+                     FireCounter = StrangerCounter = 0;
+                 }
+             });
         }
 
         public void InitializeBlobStorage()
@@ -471,7 +490,7 @@ namespace loT4WebApiSample
                     if(faceRecognizationCount>=Constants.FaceConstants.MaxFaceRecognizationFailed
                         &&blobHelper!=null)//在5分钟之内识别错误5次，将上传照片
                     {
-                        await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
+                        await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, async () =>
                         {
                             string imgName = camera.GenerateUserNameFileName(userName);
                             await blobHelper.uploadImage(imgName, imgFile);//发送图片到Blob Storage
@@ -511,7 +530,10 @@ namespace loT4WebApiSample
                 //Constants.NotificationConstants.FireWarining, userName);
                 //HttpService http = new HttpService();
                 //await http.SendGetRequest(notificationHost + queryString);
-                await ToastHelper.SendToast(Constants.ToastConstants.FireWarining,userName);
+                await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, async () =>
+                {
+                    await ToastHelper.SendToast(Constants.ToastConstants.FireWarining, userName);
+                });
             }
         }
 
@@ -527,16 +549,19 @@ namespace loT4WebApiSample
 
         private async Task SendEmergencePictureUri(string userName,string pictureUri)
         {
-            HttpService httpService = new HttpService();
-            EmergencePictureInfo emergencePicture = new EmergencePictureInfo();
-            emergencePicture.userName = userName;
-            emergencePicture.pictureUri = pictureUri;
-            string jsonContent = JsonHelper.ObjectToJson(emergencePicture);
-            HttpResponseMessage response = await httpService.SendPostRequest(emergencePictureHost, jsonContent);
-            if(response.StatusCode!=HttpStatusCode.Created)
+            await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low,async() =>
             {
-                Debug.WriteLine("EmergencePicture发送失败：" + response.Content);
-            }
+                HttpService httpService = new HttpService();
+                EmergencePictureInfo emergencePicture = new EmergencePictureInfo();
+                emergencePicture.userName = userName;
+                emergencePicture.pictureUri = pictureUri;
+                string jsonContent = JsonHelper.ObjectToJson(emergencePicture);
+                HttpResponseMessage response = await httpService.SendPostRequest(emergencePictureHost, jsonContent);
+                if (response.StatusCode != HttpStatusCode.Created)
+                {
+                    Debug.WriteLine("EmergencePicture发送失败：" + response.Content);
+                }
+            });
         }
 
         private async void mediaElement_Loaded(object sender, RoutedEventArgs e)

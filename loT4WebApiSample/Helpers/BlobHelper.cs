@@ -55,15 +55,19 @@ namespace loT4WebApiSample.Helpers
         /// <param name="containerName"></param>
         public async void RunatAppStartUp(string storageAccountName, string storageAccountKey, string containerName)
         {
-            cloudBlobContainer = 
+            try
+            {
+                cloudBlobContainer =
                 SetUpContainer(storageAccountName, storageAccountKey, containerName);
-            //await cloudBlobContainer.CreateIfNotExistsAsync();
+                //await cloudBlobContainer.CreateIfNotExistsAsync();
 
-            ContainerName = containerName;
+                ContainerName = containerName;
 
-            BlobContainerPermissions permission = new BlobContainerPermissions();
-            permission.PublicAccess = BlobContainerPublicAccessType.Blob;
-            await cloudBlobContainer.SetPermissionsAsync(permission);
+                BlobContainerPermissions permission = new BlobContainerPermissions();
+                permission.PublicAccess = BlobContainerPublicAccessType.Blob;
+                await cloudBlobContainer.SetPermissionsAsync(permission);
+            }
+            catch { }
         }
 
         /// <summary>

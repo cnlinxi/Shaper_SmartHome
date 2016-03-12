@@ -110,6 +110,8 @@ namespace loT4WebApiSample.Helpers
             // 拍摄并且存储
             await mediaCapture.CapturePhotoToStorageFileAsync(ImageEncodingProperties.CreateJpeg(), file);
 
+            await Task.Delay(500);
+
             return file;
         }
 
