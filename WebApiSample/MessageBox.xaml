@@ -12,6 +12,7 @@
     PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
     SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
 
-    <Grid x:Name="rootFrame">
-    </Grid>
+    <StackPanel x:Name="rootFrame"
+                Orientation="Vertical">
+    </StackPanel>
 </ContentDialog>

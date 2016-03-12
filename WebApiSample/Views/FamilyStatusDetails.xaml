@@ -18,7 +18,7 @@
         <charting:Chart
                 Grid.Row="1"
                 x:Name="PieChart"
-                Title="近三天威胁概况"
+                Title="近日威胁概况"
                 Margin="70,0">
             <charting:Chart.Series>
                 <Series:PieSeries

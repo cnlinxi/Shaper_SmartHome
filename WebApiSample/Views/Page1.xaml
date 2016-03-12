@@ -48,13 +48,13 @@
         <CommandBar x:Name="topBar" VerticalAlignment="Top" HorizontalAlignment="Stretch"
                     Grid.ColumnSpan="2">
             <AppBarButton Icon="Add" Label="Add" Click="AppBarButton_Click"/>
-            <AppBarButton Icon="Accept" Label="Accept" Click="AppBarButton_Click"/>
+            <!--<AppBarButton Icon="Accept" Label="Accept" Click="AppBarButton_Click"/>
             <AppBarSeparator/>
-            <AppBarButton Icon="Sort" Label="Sort" Click="AppBarButton_Click"/>
+            <AppBarButton Icon="Sort" Label="Sort" Click="AppBarButton_Click"/>-->
             <CommandBar.SecondaryCommands>
-                <AppBarButton Label="menu1" Click="AppBarButton_Click"/>
-                <AppBarButton Label="menu2" Click="AppBarButton_Click"/>
-                <AppBarButton Label="menu3" Click="AppBarButton_Click"/>
+                <AppBarButton Label="Settings" Click="AppBarButton_Click"/>
+                <AppBarButton Label="初始化设备" Click="AppBarButton_Click"/>
+                <AppBarButton Label="控制中心" Click="AppBarButton_Click"/>
             </CommandBar.SecondaryCommands>
             <CommandBar.Content>
                 <ctl:PageHeader>
@@ -67,7 +67,7 @@
             </CommandBar.Content>
         </CommandBar>
         <RelativePanel Grid.Row="1"
-                Margin="40 40">
+                Margin="60 40">
             <Ellipse x:Name="elAvator"
                 Height="100"
                 Width="100">
@@ -104,6 +104,7 @@
             </Border>
             <ListView x:Name="lvFaceListName"
                   Grid.Row="1"
+                  IsItemClickEnabled="True"
                   ItemClick="lvFaceListName_ItemClick"
                   ItemTemplate="{StaticResource FaceListNameTemplate}">
             </ListView>
@@ -145,6 +146,14 @@
                              Foreground="Green"
                              RelativePanel.RightOf="tbStatus"
                              Click="btnHomeStatus_Click"/>
+            <ToggleSwitch
+                RelativePanel.Below="tbStatus"
+                RelativePanel.AlignLeftWith="tbStatus"
+                x:Name="toggleLed"
+                Header="LED 开关"
+                IsOn="False"
+                Margin="0 30"
+                Toggled="toggleLed_Toggled"/>
         </RelativePanel>
         <Grid Grid.Row="3"
               Grid.Column="1">
@@ -158,15 +167,11 @@
             <TextBlock x:Name="tbLastActivity"
                        Grid.Row="1"
                        FontSize="24"
+                       Margin="0 20 0 0"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
+                       TextWrapping="Wrap"
                        Text="无"/>
-            <ToggleSwitch
-                Grid.Row="2"
-                x:Name="toggleLed"
-                Header="LED 开关"
-                IsOn="False"
-                Toggled="toggleLed_Toggled"/>
         </Grid>
         <ProgressRing x:Name="loading"
                       Width="80"

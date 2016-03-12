@@ -128,6 +128,7 @@ namespace WebApiSample.Views
                 this.loading.IsActive = false;
                 this.btnStartInitialization.IsEnabled = true;
                 this.hybtnUserAccount.IsEnabled = true;
+                btnStartInitialization.IsEnabled = false;
             }
         }
 

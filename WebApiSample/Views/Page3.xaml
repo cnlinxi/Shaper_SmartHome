@@ -65,6 +65,8 @@
                     <TextBox x:Name="txtMemberName"
                          MaxLength="30"
                          Margin="10"
+                         MaxWidth="400"
+                         MinWidth="200"
                          PlaceholderText="此处填写成员名(最好为英文名)"
                          TextChanged="txtMemberName_TextChanged"
                          Grid.Row="3"/>
@@ -124,6 +126,8 @@
                     <TextBox x:Name="txtAuthCode"
                          MaxLength="30"
                          Margin="10"
+                         MaxWidth="400"
+                         MinWidth="200"
                          PlaceholderText="此处填写用于验证的数字"
                          TextChanged="txtAuthCode_TextChanged"
                          Grid.Row="3"/>

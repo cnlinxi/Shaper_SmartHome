@@ -24,6 +24,7 @@ namespace WebApiSample.FaceRecognizatioin
         string uriFaceListAddFace = "https://api.projectoxford.ai/face/v1.0/facelists/";
         string uriFaceListGetName = "https://api.projectoxford.ai/face/v1.0/facelists/";
         string uriFaceListDeleteFace = "https://api.projectoxford.ai/face/v1.0/facelists/";
+        string uriEmotionDetect = "https://api.projectoxford.ai/emotion/v1.0/recognize";
         string uriFaceSimilar = "https://api.projectoxford.ai/face/v1.0/findsimilars";
 
         const string subscriptionKey = "54fa2361cc0845ed9a970a84d43aa955";
@@ -267,6 +268,7 @@ namespace WebApiSample.FaceRecognizatioin
             faceListId = faceListId.ToLower();
             try
             {
+                httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
                 string queryString = string.Format("{0}/persistedFaces/{1}", faceListId, faceId);
                 uriFaceListDeleteFace += queryString;
                 HttpResponseMessage response = await httpClient.DeleteAsync(uriFaceListDeleteFace);
@@ -462,6 +464,68 @@ namespace WebApiSample.FaceRecognizatioin
                 }
             }
             return FaceVerifyStatus.failed;
+        }
+
+        public async Task<KeyValuePair<string,double>> EmotionDetection(StorageFile imgFile)
+        {
+            try
+            {
+                if (imgFile != null)
+                {
+                    const string subscriptionKey = "d158ee5c690f460da3bf86ab60973fcf";
+
+                    httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+                    IRandomAccessStream stream = await imgFile.OpenAsync(Windows.Storage.FileAccessMode.Read);
+                    var bytes = new byte[stream.Size];
+                    await stream.ReadAsync(bytes.AsBuffer(), (uint)stream.Size, InputStreamOptions.None);
+                    HttpResponseMessage response;
+                    using (var content = new ByteArrayContent(bytes))
+                    {
+                        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+                        response = await httpClient.PostAsync(uriEmotionDetect, content);
+                        string strResponce = await response.Content.ReadAsStringAsync();
+                        if (response.StatusCode == HttpStatusCode.OK)
+                        {
+                            KeyValuePair<string,double> emotion = GetEmotion(strResponce);
+                            return emotion;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                ++errorCounter;
+                if(errorCounter<2)
+                {
+                    await EmotionDetection(imgFile);
+                }
+            }
+            return new KeyValuePair<string, double>("neutral", 0.5);
+        }
+
+        /// <summary>
+        /// 获得照片最有可能的表情及可信度
+        /// </summary>
+        /// <param name="jsonEmotion">表情json(应该为一个json数组)</param>
+        /// <returns>KeyValuePair，第一个为表情名，第二个为可信度</returns>
+        private KeyValuePair<string,double> GetEmotion(string jsonEmotion)
+        {
+            Dictionary<string, double> emotions = new Dictionary<string, double>();
+            JArray jsonArray = (JArray)JsonConvert.DeserializeObject(jsonEmotion);
+            //只取第一个人脸
+            string jsonFirstEmotion = jsonArray[0]["scores"].ToString();
+            JObject jsonObj = JObject.Parse(jsonFirstEmotion);
+            emotions.Add("anger", (double)jsonObj["anger"]);
+            emotions.Add("contempt", (double)jsonObj["contempt"]);
+            emotions.Add("disgust", (double)jsonObj["disgust"]);
+            emotions.Add("fear", (double)jsonObj["fear"]);
+            emotions.Add("happiness", (double)jsonObj["happiness"]);
+            emotions.Add("neutral", (double)jsonObj["neutral"]);
+            emotions.Add("sadness", (double)jsonObj["sadness"]);
+            emotions.Add("surprise", (double)jsonObj["surprise"]);
+
+            var dicSort = emotions.OrderByDescending(o => o.Value).ToDictionary(o => o.Key, p => p.Value);
+            return dicSort.FirstOrDefault();
         }
 
         public enum FaceVerifyStatus

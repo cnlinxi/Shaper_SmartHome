@@ -9,8 +9,25 @@
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
           EntranceNavigationTransitionInfo.IsTargetElement="True">
-
-        <TextBlock Style="{ThemeResource TitleTextBlockStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Settings"/>
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="kis"
+                   Margin="10"
+                   Style="{ThemeResource PageTitleTextBlockStyle}"
+                   Grid.Row="0"/>
+        <StackPanel Orientation="Horizontal"
+                    Grid.Row="1">
+            <TextBlock Style="{ThemeResource TitleTextBlockStyle}" 
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Margin="20 0 20 0"
+                   Text="来玩一场喜怒哀乐游戏吧"/>
+            <Button x:Name="btnStartGame"
+                    Content="开始游戏"
+                    Click="btnStartGame_Click"/>
+        </StackPanel>
     </Grid>
 </Page>

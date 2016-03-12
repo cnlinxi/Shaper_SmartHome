@@ -13,7 +13,6 @@
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
           EntranceNavigationTransitionInfo.IsTargetElement="True">
-
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition/>
@@ -25,7 +24,7 @@
         <CommandBar x:Name="topBar" VerticalAlignment="Top" HorizontalAlignment="Stretch"
                     Grid.ColumnSpan="2">
             <AppBarButton Icon="Add" Label="Add" Click="AppBarButton_Click"/>
-            <AppBarButton Icon="Accept" Label="Accept" Click="AppBarButton_Click"/>
+            <AppBarButton Icon="Refresh" Label="Refresh" Click="AppBarButton_Click"/>
             <AppBarSeparator/>
             <AppBarButton Icon="Sort" Label="Sort" Click="AppBarButton_Click"/>
             <CommandBar.SecondaryCommands>
@@ -71,8 +70,19 @@
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBlock Margin="10 20 0 0"
+                FontSize="22"
+                FontWeight="Bold"
+                VerticalAlignment="Bottom"
+                Text="近日威胁趋势"/>
             <charting:Chart
                 x:Name="Last3DaysDetail"
+                Grid.Row="1"
+                Grid.Column="0"
                 Margin="20,10">
                 <charting:Chart.LegendStyle>
                     <Style
@@ -119,6 +129,7 @@
             </charting:Chart>
             <Button x:Name="btnShowDetails"
                 Content="显示详情"
+                Grid.Row="1"
                 Grid.Column="1"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"

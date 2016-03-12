@@ -34,11 +34,33 @@ namespace WebApiSample.Views
         protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
             loading.IsActive = true;
+
+            await InitialTemperature();
+            await InitialChart();
+
+            loading.IsActive = false;
+
+            base.OnNavigatedTo(e);
+        }
+
+        private async Task InitialTemperature()
+        {
+            temperature = await GetTemperature();
+
+            if (temperature != null)
+            {
+                gauge_temperature.Value = Convert.ToDouble(temperature.temperature);
+                gauge_huminity.Value = Convert.ToDouble(temperature.humidity);
+            }
+        }
+
+        private async Task InitialChart()
+        {
             lstEmergenceCounter = await GetEmergenceCounter();
-            if(lstEmergenceCounter!=null)
+            if (lstEmergenceCounter != null)
             {
                 bool isZero = true;
-                foreach(var obj in lstEmergenceCounter)
+                foreach (var obj in lstEmergenceCounter)
                 {
                     //现在这样写的原因是IDE变成SB了，不这样我草泥马的编译不过去
                     if (!obj.counter.ToString().Equals("0"))
@@ -47,7 +69,7 @@ namespace WebApiSample.Views
                         break;
                     }
                 }
-                if(isZero)
+                if (isZero)
                 {
                     //没有数据，设置图片代替图表
                 }
@@ -56,24 +78,12 @@ namespace WebApiSample.Views
                     SetChart();
                 }
             }
-
-            temperature = await GetTemperature();
-
-            if(temperature!=null)
-            {
-                gauge_temperature.Value = Convert.ToDouble(temperature.temperature);
-                gauge_huminity.Value = Convert.ToDouble(temperature.humidity);
-            }
-
-            loading.IsActive = false;
-
-            base.OnNavigatedTo(e);
         }
 
         private void SetChart()
         {
             List<NameValueItem> items = new List<NameValueItem>();
-            for(int i=0;i<3;++i)
+            for(int i=0;i<lstEmergenceCounter.Count;++i)
             {
                 //这里乘20只是为了好看而已。。。。
                 items.Add(new NameValueItem { Name = i.ToString(),
@@ -132,8 +142,20 @@ namespace WebApiSample.Views
         //    }
         //}
 
-        private void AppBarButton_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private async void AppBarButton_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
+            AppBarButton btn = sender as AppBarButton;
+            switch(btn.Label)
+            {
+                case "Refresh":
+                    this.loading.IsActive = true;
+                    await InitialTemperature();
+                    await InitialChart();
+                    this.loading.IsActive = false;
+                    break;
+                default:
+                    break;
+            }
 
         }
 
@@ -189,7 +211,7 @@ namespace WebApiSample.Views
             FamilyStatusSumInfo familySum = new FamilyStatusSumInfo();
             int sumFire = 0;
             int sumStranger = 0;
-            for(int i=0;i<3;++i)
+            for(int i=0;i<lstEmergenceCounter.Count;++i)
             {
                 sumFire +=Convert.ToInt32(lstEmergenceCounter[i].fireCounter);
                 sumStranger += Convert.ToInt32(lstEmergenceCounter[i].strangerCounter);

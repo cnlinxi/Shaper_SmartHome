@@ -114,10 +114,15 @@
     <Compile Include="Controls\PageHeader.xaml.cs">
       <DependentUpon>PageHeader.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\EmotionDetect.xaml.cs">
+      <DependentUpon>EmotionDetect.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FaceRecognizatioin\FaceApiHelper.cs" />
     <Compile Include="Helpers\BlobHelper.cs" />
     <Compile Include="Helpers\HttpService.cs" />
+    <Compile Include="Helpers\SpeechHelper.cs" />
     <Compile Include="Helpers\UserAccountService.cs" />
+    <Compile Include="Helpers\WebCamHelper.cs" />
     <Compile Include="Helpers\WebService.cs" />
     <Compile Include="MessageBox.xaml.cs">
       <DependentUpon>MessageBox.xaml</DependentUpon>
@@ -197,6 +202,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\PageHeader.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\EmotionDetect.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

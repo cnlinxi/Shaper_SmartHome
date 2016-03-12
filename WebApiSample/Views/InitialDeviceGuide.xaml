@@ -43,6 +43,8 @@
         </StackPanel>
         <TextBox x:Name="txtAuthCode"
                  MaxLength="30"
+                 MinWidth="200"
+                 MaxWidth="400"
                  Margin="10"
                  PlaceholderText="此处填写用于验证的数字"
                  TextChanged="txtAuthCode_TextChanged"

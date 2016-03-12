@@ -12,5 +12,10 @@ namespace WebApiSample.Views
         {
             this.InitializeComponent();
         }
+
+        private void btnStartGame_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(EmotionDetect));
+        }
     }
 }

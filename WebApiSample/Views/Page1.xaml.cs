@@ -136,8 +136,7 @@ namespace WebApiSample.Views
                 if(userName!=string.Empty)
                 {
                     PushNotificationChannel channel = await PushNotificationChannelManager.CreatePushNotificationChannelForApplicationAsync();
-                    if (roamdingSettings.Values["channel"]==null
-                        || roamdingSettings.Values["channel"].ToString() != channel.Uri)
+                    if (roamdingSettings.Values["channel"]==null)
                     {
                         NotificationInfo channelModel = new NotificationInfo();
                         channelModel.userName = userName;
@@ -146,6 +145,18 @@ namespace WebApiSample.Views
                         string strJson = JsonHelper.ObjectToJson(channelModel);
                         HttpService httpService = new HttpService();
                         await httpService.SendPostRequest(NotificationHost, strJson);
+                        roamdingSettings.Values["channel"] = channel.Uri;
+                    }
+                    else if (roamdingSettings.Values["channel"].ToString() != channel.Uri)
+                    {
+                        NotificationInfo channelModel = new NotificationInfo();
+                        channelModel.userName = userName;
+                        channelModel.channelUri = channel.Uri;
+                        channelModel.expirationTime = channel.ExpirationTime.DateTime;
+                        string strJson = JsonHelper.ObjectToJson(channelModel);
+                        HttpService http = new HttpService();
+                        string queryString = string.Format("?userName={0}", userName);
+                        await http.SendPutRequest(NotificationHost + queryString, strJson);
                         roamdingSettings.Values["channel"] = channel.Uri;
                     }
                     channel.PushNotificationReceived += Channel_PushNotificationReceived;
@@ -182,17 +193,23 @@ namespace WebApiSample.Views
             }
         }
 
-        private void UpdateUIFromToast(string notificationContent)
+        private async void UpdateUIFromToast(string notificationContent)
         {
             string content = ToastHelper.ParseXml(notificationContent);
             if (content == string.Empty)
                 return;
             if(content==Constants.ToastConstants.FireAlarm)
             {
-                this.btnHomeStatus.Content = "异常";
-                this.btnHomeStatus.Foreground = new SolidColorBrush(Windows.UI.Colors.Red);
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    this.btnHomeStatus.Content = "异常";
+                    this.btnHomeStatus.Foreground = new SolidColorBrush(Windows.UI.Colors.Red);
+                });
             }
-            tbLastActivity.Text = content;
+            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+             {
+                 tbLastActivity.Text = content;
+             });
         }
 
         private void AppBarButton_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
@@ -203,12 +220,14 @@ namespace WebApiSample.Views
                 case "Add":
                     this.Frame.Navigate(typeof(AddFaceToListGuide));
                     break;
-                case "menu1":
-                    UserAccountService user = new UserAccountService();
-                    user.ClearAllCredentialFromLocker();
+                case "Settings":
+                    this.Frame.Navigate(typeof(SettingsPage));
                     break;
-                case "menu2":
+                case "初始化设备":
                     this.Frame.Navigate(typeof(InitialDeviceGuide));
+                    break;
+                case "控制中心":
+                    this.Frame.Navigate(typeof(Page2));
                     break;
                 default:
                     break;
@@ -385,7 +404,22 @@ namespace WebApiSample.Views
             {
                 FaceApiHelper faceApi = new FaceApiHelper();
                 await faceApi.DeleteFaceFromFaceList(EncriptHelper.ToMd5(userName), nameInfo.FaceId);
+                FaceListInit();//更新成员列表
             }
         }
+
+        //private async void lvFaceListName_ItemClick_1(object sender, ItemClickEventArgs e)
+        //{
+        //    FaceListNameInfo nameInfo = e.ClickedItem as FaceListNameInfo;
+        //    ContentDialogResult dialogResult =
+        //        await new MessageBox("是否删除以下的成员？删除后将失去入内的权限",
+        //        MessageBox.NotifyType.DeleteFaceFromListMessage, nameInfo.Name).ShowAsync();
+        //    if (dialogResult == ContentDialogResult.Primary
+        //        && userName != string.Empty)
+        //    {
+        //        FaceApiHelper faceApi = new FaceApiHelper();
+        //        await faceApi.DeleteFaceFromFaceList(EncriptHelper.ToMd5(userName), nameInfo.FaceId);
+        //    }
+        //}
     }
 }
