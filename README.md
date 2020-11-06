@@ -1,7 +1,7 @@
 # Shaper SmartHome
 A smart-home project. 
 
-This project win the second prize of ImagineCup 2016 China(Shaper).
+This project win the second prize of ImagineCup 2016 China (Shaper).
 
 ### Project features
 
